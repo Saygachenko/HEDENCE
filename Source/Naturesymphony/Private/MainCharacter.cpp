@@ -51,17 +51,25 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
+// Функция передвижения персонажа
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D AxisValue = Value.Get<FVector2D>();
 
 	if (Controller && AxisValue.Y != 0.f || AxisValue.X != 0.f)
 	{
-		AddMovementInput(GetActorForwardVector(), AxisValue.Y);
-		AddMovementInput(GetActorRightVector(), AxisValue.X);
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, AxisValue.Y);
+		AddMovementInput(RightDirection, AxisValue.X);
 	}
 }
 
+// Функция поворота камеры
 void AMainCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D AxisValue = Value.Get<FVector2D>();

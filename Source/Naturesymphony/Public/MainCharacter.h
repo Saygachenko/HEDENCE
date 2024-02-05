@@ -45,6 +45,9 @@ protected:
 	UInputAction* JumpInputAction;
 
 private:
+	// Функция передвижения персонажа
 	void Move(const FInputActionValue& Value);
+
+	// Функция поворота камеры
 	void Look(const FInputActionValue& Value);
 };
