@@ -44,10 +44,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* JumpInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* WalkInputAction;
+
+	// Переменная изменяет поле MaxWalkSpeed
+	UPROPERTY(EditDefaultsOnly, Category = "Custom Character Movement")
+	float WalkSpeed = 300.0f;
+
 private:
 	// Функция передвижения персонажа
 	void Move(const FInputActionValue& Value);
 
 	// Функция поворота камеры
 	void Look(const FInputActionValue& Value);
+
+	// Функция ходьбы для персонажа
+	void WalkMovement();
 };
