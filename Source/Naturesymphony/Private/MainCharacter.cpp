@@ -88,7 +88,7 @@ void AMainCharacter::StartWalkMovement()
 {
 	if(GetCharacterMovement())
 	{ 
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	}
 }
 
@@ -106,8 +106,9 @@ void AMainCharacter::StartCrouchMovement()
 {
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = false;
 	}
 }
 
@@ -117,6 +118,7 @@ void AMainCharacter::StopCrouchMovement()
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = false;
+		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = true;
 		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	}
 }

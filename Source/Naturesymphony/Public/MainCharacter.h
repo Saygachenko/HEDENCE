@@ -50,10 +50,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* CrouchInputAction;
 
-	// Переменная изменяет поле MaxWalkSpeed. Она так же работает и для скорости приседания.
-	UPROPERTY(EditDefaultsOnly, Category = "Custom Character Movement")
-	float WalkSpeed = 300.0f; 
-
 private:
 
 	// Функция передвижения персонажа
