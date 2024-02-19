@@ -32,41 +32,57 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputMappingContext* InputMapping;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* MoveInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* LookInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* JumpInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* WalkInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* CrouchInputAction;
+
+	// Function falling on ground from height and take damage
+	UFUNCTION()
+	void OnGroundLanded(const FHitResult& Hit);
+
+	// Variable range fall from height
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	FVector2D LandedVelocity = FVector2D(800.0f, 1200.0f);
+
+	// Variable range damage from height
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
 
 private:
 
-	// Функция передвижения персонажа
+	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
-	// Функция поворота камеры
+	// Function rotation camera
 	void Look(const FInputActionValue& Value);
 
-	// Функция начала ходьбы для персонажа
+	// Function started walk for character
 	void StartWalkMovement();
 
-	// Функция остановки ходьбы для персонажа
+	// Function stoped walk for character
 	void StopWalkMovement();
 
-	// Функция начала приседания для персонажа
+	// Function started crouch for character
 	void StartCrouchMovement();
 
-	// Функция остановки приседания для персонажа
+	// Function stoped crouch for character 
 	void StopCrouchMovement();
+
 };

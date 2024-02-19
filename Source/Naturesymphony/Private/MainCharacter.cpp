@@ -6,6 +6,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HealthComponent.h"
+#include "GameFrameWork/Character.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -13,6 +16,7 @@ AMainCharacter::AMainCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +34,8 @@ void AMainCharacter::BeginPlay()
 			}
 		}
 	}
+
+	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 }
 
 // Called every frame
@@ -37,6 +43,10 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HealthComponent)
+	{
+		const float Health = HealthComponent->GetHealth();
+	}
 }
 
 // Called to bind functionality to input
@@ -56,7 +66,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
-// Функция передвижения персонажа
+// Function movement for character
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D AxisValue = Value.Get<FVector2D>();
@@ -74,7 +84,7 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-// Функция поворота камеры
+// Function rotation camera
 void AMainCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D AxisValue = Value.Get<FVector2D>();
@@ -83,16 +93,16 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 	AddControllerYawInput(AxisValue.X);
 }
 
-// Функция начала ходьбы для персонажа
+// Function started walk for character
 void AMainCharacter::StartWalkMovement()
 {
 	if(GetCharacterMovement())
 	{ 
-		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+		GetCharacterMovement()->MaxWalkSpeed = 250.0f;
 	}
 }
 
-// Функция остановки ходьбы для персонажа
+// Function stoped walk for character
 void AMainCharacter::StopWalkMovement()
 {
 	if (GetCharacterMovement())
@@ -101,7 +111,7 @@ void AMainCharacter::StopWalkMovement()
 	}
 }
 
-// Функция начала приседания для персонажа
+// Function started crouch for character
 void AMainCharacter::StartCrouchMovement()
 {
 	if (GetCharacterMovement())
@@ -112,7 +122,7 @@ void AMainCharacter::StartCrouchMovement()
 	}
 }
 
-// Функция остановки приседания для персонажа
+// Function stoped crouch for character 
 void AMainCharacter::StopCrouchMovement()
 {
 	if (GetCharacterMovement())
@@ -120,5 +130,18 @@ void AMainCharacter::StopCrouchMovement()
 		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = false;
 		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = true;
 		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+}
+
+// Function falling on ground from height and take damage
+void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+	const float FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
+	UE_LOG(LogTemp, Display, TEXT("Falling from: %f"), FallVelocityZ);
+	if (FallVelocityZ > LandedVelocity.X)
+	{
+		const float FinalDamage = FMath::GetMappedRangeValueClamped(LandedVelocity, LandedDamage, FallVelocityZ);
+		UE_LOG(LogTemp, Display, TEXT("Falling from: %f"), FinalDamage);
+		TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 	}
 }
