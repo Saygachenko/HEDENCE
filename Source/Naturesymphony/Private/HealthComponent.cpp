@@ -27,6 +27,12 @@ void UHealthComponent::BeginPlay()
 	}
 }
 
+float UHealthComponent::GetHealth() const
+{
+	return Health;
+}
+
+// Function delegate take damage information
 void UHealthComponent::OnTakeAnyDagame(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);

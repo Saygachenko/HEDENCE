@@ -22,10 +22,8 @@ protected:
 
 public:
 	// Function returns Health variable
-	float GetHealth() const
-	{
-		return Health;
-	}
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta=(ClampMin = 0.0f, ClampMax = 1000.0f))
@@ -34,6 +32,7 @@ protected:
 private:
 	float Health = 0.0f;
 
+	// Function delegate take damage information
 	UFUNCTION()
 	void OnTakeAnyDagame(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };

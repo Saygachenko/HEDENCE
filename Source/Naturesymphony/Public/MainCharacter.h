@@ -57,13 +57,21 @@ protected:
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& Hit);
 
-	// Variable range fall from height
-	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	FVector2D LandedVelocity = FVector2D(800.0f, 1200.0f);
+	// Min value for fall from height
+	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta=(ClampMin = 0.0f, ClampMax = 5000.0f))
+	float MinVelocityZ = 800.0f;
 
-	// Variable range damage from height
-	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
+	// Max value for fall from height
+	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta=(ClampMin = 0.0f, ClampMax = 5000.0f))
+	float MaxVelocityZ = 1200.0f;
+
+	// Min value damage for from fall
+	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
+	float MinDamageLanded = 10.0f;
+
+	// Max value damage for from fall
+	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
+	float MaxDamageLanded = 100.0f;
 
 private:
 

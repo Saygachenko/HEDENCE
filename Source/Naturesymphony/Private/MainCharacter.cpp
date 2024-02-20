@@ -43,10 +43,6 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HealthComponent)
-	{
-		const float Health = HealthComponent->GetHealth();
-	}
 }
 
 // Called to bind functionality to input
@@ -138,10 +134,12 @@ void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 {
 	const float FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
 	UE_LOG(LogTemp, Display, TEXT("Falling from: %f"), FallVelocityZ);
-	if (FallVelocityZ > LandedVelocity.X)
+	if (FallVelocityZ > MinVelocityZ)
 	{
-		const float FinalDamage = FMath::GetMappedRangeValueClamped(LandedVelocity, LandedDamage, FallVelocityZ);
-		UE_LOG(LogTemp, Display, TEXT("Falling from: %f"), FinalDamage);
+		TRange<float> LandedRangeVelocity(MinVelocityZ, MaxVelocityZ);
+		TRange<float> LandedDamageRange(MinDamageLanded, MaxDamageLanded);
+		const float FinalDamage = FMath::GetMappedRangeValueClamped(LandedRangeVelocity, LandedDamageRange, FallVelocityZ);
+		UE_LOG(LogTemp, Display, TEXT("Final Damage: %f"), FinalDamage);
 		TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 	}
 }
