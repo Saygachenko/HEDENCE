@@ -17,14 +17,10 @@ class NATURESYMPHONY_API AMainPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 protected:
+	// Called when the game starts
 	virtual void BeginPlay() override;
-
-protected:
-	UPROPERTY(BlueprintReadWrite)
-	class UHealthComponent* HealthComponentController;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> HUDScreenClass;
-
 };

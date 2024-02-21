@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "HealthComponent.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -73,8 +74,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
 	float MaxDamageLanded = 100.0f;
 
-private:
+	// Function delegate death Character
+	UFUNCTION()
+	void OnDeath();
 
+private:
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -92,5 +96,4 @@ private:
 
 	// Function stoped crouch for character 
 	void StopCrouchMovement();
-
 };

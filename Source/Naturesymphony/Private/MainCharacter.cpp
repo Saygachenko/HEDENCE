@@ -9,6 +9,7 @@
 #include "HealthComponent.h"
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -36,6 +37,7 @@ void AMainCharacter::BeginPlay()
 	}
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
+	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
 }
 
 // Called every frame
@@ -142,4 +144,13 @@ void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 		UE_LOG(LogTemp, Display, TEXT("Final Damage: %f"), FinalDamage);
 		TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 	}
+}
+
+// Function delegate death Character
+void AMainCharacter::OnDeath()
+{
+	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	SetLifeSpan(1000.0f);
 }

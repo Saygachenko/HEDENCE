@@ -12,7 +12,6 @@ UHealthComponent::UHealthComponent()
 
 }
 
-
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
@@ -27,9 +26,16 @@ void UHealthComponent::BeginPlay()
 	}
 }
 
-float UHealthComponent::GetHealth() const
+// Function returns HealthPercent variable
+float UHealthComponent::GetHealthPercent() const
 {
-	return Health;
+	return Health / MaxHealth;
+}
+
+// Function death for Character
+bool UHealthComponent::bIsDead()
+{
+	return Health <= 0.0f;
 }
 
 // Function delegate take damage information
@@ -37,4 +43,10 @@ void UHealthComponent::OnTakeAnyDagame(AActor* DamagedActor, float Damage, const
 {
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 	UE_LOG(LogTemp, Error, TEXT("Health: %f"), Health);
+
+	if (bIsDead())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnDeath!"));
+		OnDeath.Broadcast();
+	}
 }

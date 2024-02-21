@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UHealthComponent : public UActorComponent
@@ -21,9 +22,15 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Function returns Health variable
-	UFUNCTION(BlueprintCallable)
-	float GetHealth() const;
+	// Function returns HealthPercent variable
+	UFUNCTION(BlueprintPure)
+	float GetHealthPercent() const;
+
+	// Function death for Character
+	UFUNCTION(BlueprintPure)
+	bool bIsDead();
+
+	FOnDeathSignature OnDeath;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta=(ClampMin = 0.0f, ClampMax = 1000.0f))

@@ -4,9 +4,8 @@
 #include "MainPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
-#include "HealthComponent.h"
 
-
+// Called when the game starts
 void AMainPlayerController::BeginPlay()
 {
 	UUserWidget* HUDScreen = CreateWidget(this, HUDScreenClass);
