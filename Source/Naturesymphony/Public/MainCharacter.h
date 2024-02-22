@@ -78,6 +78,10 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
+	// Function spawn weapon
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	TSubclassOf<class ABaseWeaponActor> WeaponClass;
+
 private:
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
@@ -96,4 +100,6 @@ private:
 
 	// Function stoped crouch for character 
 	void StopCrouchMovement();
+
+	void SpawnWeapon();
 };

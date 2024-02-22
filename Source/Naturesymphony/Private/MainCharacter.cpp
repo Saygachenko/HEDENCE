@@ -10,6 +10,7 @@
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
+#include "BaseWeaponActor.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -38,6 +39,8 @@ void AMainCharacter::BeginPlay()
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
+
+	SpawnWeapon();
 }
 
 // Called every frame
@@ -153,4 +156,18 @@ void AMainCharacter::OnDeath()
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SetLifeSpan(1000.0f);
+}
+
+// Function spawn weapon
+void AMainCharacter::SpawnWeapon()
+{
+	if (GetWorld())
+	{
+		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClass);
+		if (Weapon)
+		{
+			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+			Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponSocket");
+		}
+	}
 }
