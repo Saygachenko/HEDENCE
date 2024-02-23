@@ -36,6 +36,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UWeaponComponent* WeaponComponent;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputMappingContext* InputMapping;
 
@@ -53,6 +56,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* CrouchInputAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* EquipWeaponInputAction;
 
 	// Function falling on ground from height and take damage
 	UFUNCTION()
@@ -78,10 +84,6 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
-	// Function spawn weapon
-	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
-	TSubclassOf<class ABaseWeaponActor> WeaponClass;
-
 private:
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
@@ -100,6 +102,4 @@ private:
 
 	// Function stoped crouch for character 
 	void StopCrouchMovement();
-
-	void SpawnWeapon();
 };

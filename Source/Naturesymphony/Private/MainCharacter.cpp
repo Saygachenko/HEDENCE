@@ -10,7 +10,7 @@
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
-#include "BaseWeaponActor.h"
+#include "WeaponComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -19,6 +19,7 @@ AMainCharacter::AMainCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("HealthComponent"));
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(FName("WeaponComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -39,8 +40,6 @@ void AMainCharacter::BeginPlay()
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
-
-	SpawnWeapon();
 }
 
 // Called every frame
@@ -62,8 +61,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
-		Input->BindAction(CrouchInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::StartCrouchMovement);
+		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartCrouchMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopCrouchMovement);
+		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon);
 	}
 }
 
@@ -155,19 +155,5 @@ void AMainCharacter::OnDeath()
 	GetCharacterMovement()->DisableMovement();
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	SetLifeSpan(1000.0f);
-}
-
-// Function spawn weapon
-void AMainCharacter::SpawnWeapon()
-{
-	if (GetWorld())
-	{
-		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClass);
-		if (Weapon)
-		{
-			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
-			Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponSocket");
-		}
-	}
+	SetLifeSpan(5.0f);
 }
