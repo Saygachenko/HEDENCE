@@ -29,15 +29,26 @@ void UWeaponComponent::SpawnWeapons()
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 	if (Character)
 	{
-		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClasse);
+		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClass);
 		if (Weapon)
 		{
-			Weapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MeleeWeaponAttachSocketName);
 			CurrentWeapon = Weapon;
+			CurrentWeapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MeleeWeaponAttachSocketName);
 		}
 	}
 }
 
+// Function play anim montage for character
+void UWeaponComponent::PlayAnimMontaget(UAnimMontage* Animation)
+{
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (Character)
+	{
+		Character->PlayAnimMontage(Animation);
+	}
+}
+
+// Function equpped weapon
 void UWeaponComponent::EquipWeapon()
 {
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
@@ -45,15 +56,13 @@ void UWeaponComponent::EquipWeapon()
 	{
 		if (CurrentWeapon && !bIsEquiped)
 		{
-			CurrentWeapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), WeaponAttachSocketName);
+			PlayAnimMontaget(EquipAnimMontage);
 			bIsEquiped = true;
-			UE_LOG(LogTemp, Error, TEXT("Socket name: %s"), *CurrentWeapon->GetAttachParentSocketName().ToString());
 		}
 		else
 		{
-			CurrentWeapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MeleeWeaponAttachSocketName);
+			PlayAnimMontaget(UnEquipAnimMontage);
 			bIsEquiped = false;
-			UE_LOG(LogTemp, Error, TEXT("Socket name: %s"), *CurrentWeapon->GetAttachParentSocketName().ToString());
 		}
 	}
 }

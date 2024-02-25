@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "WeaponComponent.generated.h"
 
+class ABaseWeaponActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UWeaponComponent : public UActorComponent
@@ -21,23 +22,35 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	// Function equpped weapon
 	void EquipWeapon();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
-	TSubclassOf<class ABaseWeaponActor> WeaponClasse;
+	TSubclassOf<ABaseWeaponActor> WeaponClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
 	FName MeleeWeaponAttachSocketName = "MeleeHipSocket";
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
 	FName WeaponAttachSocketName = "WeaponSocket";
 
-private:
-	bool bIsEquiped = false;
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* EquipAnimMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* UnEquipAnimMontage;
+
+	UPROPERTY(BlueprintReadWrite)
 	ABaseWeaponActor* CurrentWeapon = nullptr;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsEquiped = false;
+
+private:
 	// Function spawn weapons
 	void SpawnWeapons();
+
+	// Function play anim montage for character
+	void PlayAnimMontaget(UAnimMontage* Animation);
 };
