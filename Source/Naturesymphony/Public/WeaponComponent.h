@@ -21,8 +21,11 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	// Called when the game ended
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
-	// Function equpment weapon
+	// Function equipping weapon
 	void EquippingWeapon();
 
 protected:

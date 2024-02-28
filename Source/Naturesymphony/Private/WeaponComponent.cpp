@@ -23,6 +23,17 @@ void UWeaponComponent::BeginPlay()
 	SpawnWeapons();
 }
 
+// Called when the game ended
+void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Destroy();
+	}
+}
+
 // Function spawn weapons
 void UWeaponComponent::SpawnWeapons()
 {
@@ -38,7 +49,7 @@ void UWeaponComponent::SpawnWeapons()
 	}
 }
 
-// Function equpped weapon
+// Function equipping weapon
 void UWeaponComponent::EquippingWeapon()
 {
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
