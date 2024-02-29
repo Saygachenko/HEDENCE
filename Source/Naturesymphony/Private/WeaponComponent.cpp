@@ -38,7 +38,7 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UWeaponComponent::SpawnWeapons()
 {
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (Character)
+	if (Character && WeaponClass)
 	{
 		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClass);
 		if (Weapon)
