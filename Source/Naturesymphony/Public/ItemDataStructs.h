@@ -11,7 +11,7 @@ enum class EItemType : uint8
 {
 	Weapon UMETA(DisplayName = "Weapon"),
 	Consumable UMETA(DisplayName = "Consumable"),
-	Mundane UMETA(DisplayName = "Mundane")
+	Other UMETA(DisplayName = "Other")
 };
 
 UENUM()
