@@ -96,10 +96,4 @@ private:
 
 	// Function stoped walk for character
 	void StopWalkMovement();
-
-	// Function started crouch for character
-	void StartCrouchMovement();
-
-	// Function stoped crouch for character 
-	void StopCrouchMovement();
 };

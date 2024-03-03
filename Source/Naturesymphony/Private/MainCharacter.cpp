@@ -61,8 +61,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
-		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartCrouchMovement);
-		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopCrouchMovement);
+		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
+		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquippingWeapon);
 	}
 }
@@ -108,28 +108,6 @@ void AMainCharacter::StopWalkMovement()
 {
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
-	}
-}
-
-// Function started crouch for character
-void AMainCharacter::StartCrouchMovement()
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
-		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = false;
-	}
-}
-
-// Function stoped crouch for character 
-void AMainCharacter::StopCrouchMovement()
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = false;
-		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = true;
 		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	}
 }
