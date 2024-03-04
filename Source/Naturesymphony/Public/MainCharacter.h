@@ -34,10 +34,19 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class USphereComponent* CameraCollisionComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputMappingContext* InputMapping;
@@ -96,4 +105,18 @@ private:
 
 	// Function stoped walk for character
 	void StopWalkMovement();
+
+	// Function started crouch for character
+	virtual void Crouch(bool bClientSimulation) override;
+
+	// Function delegate OnComponentBeginOverlap
+	UFUNCTION()
+	void OnCameraCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	// Function delegate OnComponentEndOverlap
+	UFUNCTION()
+	void OnCameraCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// Function checked overlap camer and capsule of character
+	void CheckCameraOverlap();
 };

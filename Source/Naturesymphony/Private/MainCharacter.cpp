@@ -11,6 +11,10 @@
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "WeaponComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -18,8 +22,26 @@ AMainCharacter::AMainCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("HealthComponent"));
-	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(FName("WeaponComponent"));
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(FName("SpringArm"));
+	SpringArmComponent->SetupAttachment(GetRootComponent());
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(FName("Camera"));
+	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("Health"));
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(FName("Weapon"));
+
+	CameraCollisionComponent = CreateDefaultSubobject<USphereComponent>(FName("CameraCollision"));
+	CameraCollisionComponent->SetupAttachment(CameraComponent);
+
+	SpringArmComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
+	SpringArmComponent->SocketOffset = FVector(50.0f, 50.0f, 30.0f);
+	SpringArmComponent->bUsePawnControlRotation = true;
+	SpringArmComponent->bEnableCameraLag = true;
+	SpringArmComponent->CameraLagSpeed = 15.0f;
+
+	CameraCollisionComponent->SetSphereRadius(10.0f);
+	CameraCollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +62,8 @@ void AMainCharacter::BeginPlay()
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
+	CameraCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionBeginOverlap);
+	CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionEndOverlap);
 }
 
 // Called every frame
@@ -59,6 +83,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		Input->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		Input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
@@ -72,7 +97,7 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D AxisValue = Value.Get<FVector2D>();
 
-	if (Controller && AxisValue.Y != 0.f || AxisValue.X != 0.f)
+	if (Controller && AxisValue.Y != 0.0f || AxisValue.X != 0.0f)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -112,6 +137,15 @@ void AMainCharacter::StopWalkMovement()
 	}
 }
 
+// Function started crouch for character
+void AMainCharacter::Crouch(bool bClientSimulation)
+{
+	if (!GetCharacterMovement()->IsFalling())
+	{
+		Super::Crouch(bClientSimulation);
+	}
+}
+
 // Function falling on ground from height and take damage
 void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 {
@@ -134,4 +168,23 @@ void AMainCharacter::OnDeath()
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SetLifeSpan(5.0f);
+}
+
+// Function delegate OnComponentBeginOverlap
+void AMainCharacter::OnCameraCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	CheckCameraOverlap();
+}
+
+// Function delegate OnComponentEndOverlap
+void AMainCharacter::OnCameraCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	CheckCameraOverlap();
+}
+
+// Function checked overlap camer and capsule of character
+void AMainCharacter::CheckCameraOverlap()
+{
+	const bool HideMesh = CameraCollisionComponent->IsOverlappingComponent(GetCapsuleComponent());
+	GetMesh()->SetOwnerNoSee(HideMesh);
 }
