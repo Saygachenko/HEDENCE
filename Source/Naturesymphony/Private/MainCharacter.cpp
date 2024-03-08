@@ -15,6 +15,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
+#include "InventorySystemComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -30,6 +31,7 @@ AMainCharacter::AMainCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("Health"));
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(FName("Weapon"));
+	InventorySystemComponent = CreateDefaultSubobject<UInventorySystemComponent>(FName("Inventory"));
 
 	CameraCollisionComponent = CreateDefaultSubobject<USphereComponent>(FName("CameraCollision"));
 	CameraCollisionComponent->SetupAttachment(CameraComponent);

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "HealthComponent.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -44,6 +43,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UInventorySystemComponent* InventorySystemComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class USphereComponent* CameraCollisionComponent;
