@@ -40,7 +40,7 @@ void UInventorySystemComponent::InteractionTrace()
 	FVector TraceStartEnd = GetOwner()->GetActorLocation();
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1));
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
 	
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(GetOwner());

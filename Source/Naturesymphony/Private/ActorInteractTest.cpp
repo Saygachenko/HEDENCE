@@ -3,12 +3,16 @@
 
 #include "ActorInteractTest.h"
 
+#include "ItemDataComponent.h"
+#include "ItemDataStructs.h"
+
 // Sets default values
 AActorInteractTest::AActorInteractTest()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
 }
 
 // Called when the game starts or when spawned
@@ -25,8 +29,21 @@ void AActorInteractTest::Tick(float DeltaTime)
 
 }
 
+// Function overriding view on item of interface
 void AActorInteractTest::LookAt()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interacting"));
-}
+	if (ItemDataComponent)
+	{
+		FName RowName = ItemDataComponent->ItemID.RowName;
 
+		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemID.DataTable;
+		if (DataTable)
+		{
+			FItemData* ItemStruct = DataTable->FindRow<FItemData>(RowName, "No appropriate row name!");
+			if (ItemStruct)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Pick up: %s"), *ItemStruct->Name.ToString());
+			}
+		}
+	}
+}

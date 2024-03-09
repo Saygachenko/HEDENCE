@@ -16,13 +16,18 @@ public:
 	// Sets default values for this actor's properties
 	AActorInteractTest();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Function overriding view on item of interface
+	UFUNCTION(BlueprintCallable)
+	virtual void LookAt() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UItemDataComponent* ItemDataComponent;
 
-	virtual void LookAt() override;
 };
