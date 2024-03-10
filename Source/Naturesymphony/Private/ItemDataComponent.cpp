@@ -13,7 +13,6 @@ UItemDataComponent::UItemDataComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UItemDataComponent::BeginPlay()
 {
@@ -32,3 +31,8 @@ void UItemDataComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	// ...
 }
 
+// Function of overriding interaction with interface item
+void UItemDataComponent::InteractWith()
+{
+	GetOwner()->Destroy();
+}

@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ItemDataStructs.h"
+#include "InteractInterface.h"
 #include "ItemDataComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class NATURESYMPHONY_API UItemDataComponent : public UActorComponent
+class NATURESYMPHONY_API UItemDataComponent : public UActorComponent, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	int32 Quantity = 1;
+
+	// Function of overriding interaction with interface item
+	virtual void InteractWith() override;
 
 protected:
 	// Called when the game starts

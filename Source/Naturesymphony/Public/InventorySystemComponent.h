@@ -31,7 +31,11 @@ public:
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
+	// Function Interact with item
+	UFUNCTION()
+	void Interact();
+
 protected:
 	// We will need to replicate an array of the structure
 	UPROPERTY(EditDefaultsOnly, Category = "Invetory Data")
@@ -43,13 +47,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
 	float SphereTraceRadius = 150.0f;
 
-private:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	AActor* LookAtActor = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	AActor* LastLookedActor = nullptr;
 
+private:
 	// Function add to inventory
 	void AddToInventory();
 

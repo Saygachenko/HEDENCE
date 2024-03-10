@@ -91,6 +91,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquippingWeapon);
+		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 	}
 }
 

@@ -71,6 +71,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* EquipWeaponInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* InteractInputAction;
+
 	// Function falling on ground from height and take damage
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& Hit);

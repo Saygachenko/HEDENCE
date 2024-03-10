@@ -5,6 +5,7 @@
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "InteractInterface.h"
+#include "ItemDataComponent.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -71,6 +72,7 @@ void UInventorySystemComponent::InteractionTrace()
 				{
 					ActorInterface->LookAt();
 					LastLookedActor = LookAtActor;
+					LookAtActor = nullptr;
 				}
 			}
 		}
@@ -78,5 +80,19 @@ void UInventorySystemComponent::InteractionTrace()
 	else
 	{
 		LastLookedActor = nullptr;
+	}
+}
+
+// Function Interact with item
+void UInventorySystemComponent::Interact()
+{
+	if (LastLookedActor)
+	{
+		UItemDataComponent* ItemDataComponent = LastLookedActor->GetComponentByClass<UItemDataComponent>();
+		if (ItemDataComponent)
+		{
+			IInteractInterface* ComponentInterface = Cast<IInteractInterface>(ItemDataComponent);
+			ComponentInterface->InteractWith();
+		}
 	}
 }
