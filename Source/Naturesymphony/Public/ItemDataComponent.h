@@ -22,7 +22,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
-	FDataTableRowHandle ItemID; // You need to set the item ID to the default
+	FDataTableRowHandle ItemID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	int32 Quantity = 1;

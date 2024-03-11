@@ -3,6 +3,8 @@
 
 #include "ItemDataComponent.h"
 
+#include "UObject/ConstructorHelpers.h"
+
 // Sets default values for this component's properties
 UItemDataComponent::UItemDataComponent()
 {
@@ -10,7 +12,16 @@ UItemDataComponent::UItemDataComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	// Set defaults DataTable
+	ConstructorHelpers::FObjectFinder<UDataTable> DataTableAsset(TEXT("/Game/Naturesymphony/Inventory/ItemsData/DT_Items"));
+	if (DataTableAsset.Succeeded())
+	{
+		ItemID.DataTable = DataTableAsset.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DataTable asset not found!"));
+	}
 }
 
 // Called when the game starts

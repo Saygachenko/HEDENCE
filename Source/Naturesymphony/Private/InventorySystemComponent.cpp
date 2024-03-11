@@ -24,15 +24,75 @@ void UInventorySystemComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 }
 
 // Function add to inventory
-void UInventorySystemComponent::AddToInventory()
+void UInventorySystemComponent::AddToInventory(FName ItemID, int32 Quantity)
 {
+	bool HasFailed = false;
 
+	while (Quantity > 0 && !HasFailed)
+	{
+		if (FindSlot(ItemID).FoundSlot)
+		{
+
+		}
+	}
 }
 
 // Function remove to inventory
 void UInventorySystemComponent::RemoveFromInventory()
 {
 
+}
+
+// Function finded slot
+FSlotResult UInventorySystemComponent::FindSlot(FName ItemID)
+{
+	int32 Index = 0;
+	bool FoundSlot = false;
+
+	for (auto Slot : SlotStructArray)
+	{
+		Index++;
+
+		FName SlotID = Slot.ID;
+		int32 SlotQuantity = Slot.Quantity;
+
+		if (SlotID == ItemID)
+		{
+			if (SlotQuantity < GetMaxStackSize(ItemID))
+			{
+				return { Index , FoundSlot = true };
+			}
+		}
+	}
+
+	return { Index = -1, FoundSlot = false };
+}
+
+// Function get max stack size
+int32 UInventorySystemComponent::GetMaxStackSize(FName ItemID)
+{
+	FName RowName = ItemID;
+	
+	if (ItemsDataTable)
+	{
+		FItemData* ItemData = ItemsDataTable->FindRow<FItemData>(RowName, "");
+		if (ItemData)
+		{
+			int32 StackSize = ItemData->StackSize;
+
+			return StackSize;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Item data not found for ItemID: %s"), *ItemID.ToString());
+	}
+
+	return 0;
 }
 
 // Function overlapping with item
