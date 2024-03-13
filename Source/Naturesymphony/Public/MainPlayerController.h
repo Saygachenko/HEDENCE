@@ -7,6 +7,7 @@
 #include "MainPlayerController.generated.h"
 
 class UUserWidget;
+class UInputAction;
 
 /**
  * 
@@ -16,11 +17,24 @@ class NATURESYMPHONY_API AMainPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+
+	virtual void SetupInputComponent() override;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* InventoryInputAction;
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> HUDScreenClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> InventoryMenuClass;
+
+	// Function to open menu inventory
+	void OpenMenu();
 };

@@ -4,6 +4,8 @@
 #include "MainPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 // Called when the game starts
 void AMainPlayerController::BeginPlay()
@@ -12,5 +14,24 @@ void AMainPlayerController::BeginPlay()
 	if (HUDScreen != nullptr)
 	{
 		HUDScreen->AddToViewport();
+	}
+}
+
+void AMainPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(InputComponent))
+	{
+		Input->BindAction(InventoryInputAction, ETriggerEvent::Started, this, &AMainPlayerController::OpenMenu);
+	}
+}
+
+void AMainPlayerController::OpenMenu()
+{
+	UUserWidget* InventoryMenu = CreateWidget(this, InventoryMenuClass);
+	if (InventoryMenu != nullptr)
+	{
+		InventoryMenu->AddToViewport();
 	}
 }
