@@ -34,9 +34,9 @@ void AActorInteractTest::LookAt()
 {
 	if (ItemDataComponent)
 	{
-		FName RowName = ItemDataComponent->ItemID.RowName;
+		FName RowName = ItemDataComponent->ItemDataTableRow.RowName;
 
-		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemID.DataTable;
+		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
 		if (DataTable)
 		{
 			FItemData* ItemStruct = DataTable->FindRow<FItemData>(RowName, "No appropriate row name!");

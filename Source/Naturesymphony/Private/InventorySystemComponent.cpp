@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "InteractInterface.h"
 #include "ItemDataComponent.h"
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -13,6 +14,14 @@ UInventorySystemComponent::UInventorySystemComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+// Called when the game starts
+void UInventorySystemComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SlotStructArray.SetNum(InventorySize);
 }
 
 // Called every frame
@@ -24,17 +33,40 @@ void UInventorySystemComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 }
 
 // Function add to inventory
-void UInventorySystemComponent::AddToInventory(FName ItemID, int32 Quantity)
+FInventoryOperationResult UInventorySystemComponent::AddToInventory(FName ItemID, int32 Quantity)
 {
 	bool HasFailed = false;
+	int32 QuantityRemaining = Quantity;
 
-	while (Quantity > 0 && !HasFailed)
+	while (QuantityRemaining > 0 && !HasFailed)
 	{
-		if (FindSlot(ItemID).FoundSlot)
+		if (FindSlot(ItemID).Success)
 		{
-
+			int32 IndexItemSlot = FindSlot(ItemID).Value;
+			AddToStack(IndexItemSlot, 1);
+			QuantityRemaining--;
+		}
+		else
+		{
+			if (AnyEmptySlotsAvailable().Success)
+			{
+				if (CreateNewStack(ItemID, 1))
+				{
+					QuantityRemaining--;
+				}
+				else
+				{
+					HasFailed = true;
+				}
+			}
+			else
+			{
+				HasFailed = true;
+			}
 		}
 	}
+
+	return { QuantityRemaining, !HasFailed };
 }
 
 // Function remove to inventory
@@ -44,28 +76,28 @@ void UInventorySystemComponent::RemoveFromInventory()
 }
 
 // Function finded slot
-FSlotResult UInventorySystemComponent::FindSlot(FName ItemID)
+FInventoryOperationResult UInventorySystemComponent::FindSlot(FName ItemID)
 {
-	int32 Index = 0;
+	int32 Index = -1;
 	bool FoundSlot = false;
 
-	for (auto Slot : SlotStructArray)
+	for (int32 i = 0; i < SlotStructArray.Num(); ++i)
 	{
-		Index++;
+		const auto& Slot = SlotStructArray[i];
 
 		FName SlotID = Slot.ID;
 		int32 SlotQuantity = Slot.Quantity;
 
-		if (SlotID == ItemID)
+		if (SlotID == ItemID && SlotQuantity < GetMaxStackSize(ItemID))
 		{
-			if (SlotQuantity < GetMaxStackSize(ItemID))
-			{
-				return { Index , FoundSlot = true };
-			}
+			Index = i;
+			FoundSlot = true;
+
+			break;
 		}
 	}
 
-	return { Index = -1, FoundSlot = false };
+	return { Index, FoundSlot };
 }
 
 // Function get max stack size
@@ -73,9 +105,10 @@ int32 UInventorySystemComponent::GetMaxStackSize(FName ItemID)
 {
 	FName RowName = ItemID;
 	
-	if (ItemsDataTable)
+	TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
+	if (DataTable)
 	{
-		FItemData* ItemData = ItemsDataTable->FindRow<FItemData>(RowName, "");
+		FItemData* ItemData = DataTable->FindRow<FItemData>(RowName, "");
 		if (ItemData)
 		{
 			int32 StackSize = ItemData->StackSize;
@@ -93,6 +126,51 @@ int32 UInventorySystemComponent::GetMaxStackSize(FName ItemID)
 	}
 
 	return 0;
+}
+
+// Function add to stack item in inventory
+void UInventorySystemComponent::AddToStack(int32 Index, int32 Quantity)
+{
+	if (SlotStructArray.IsValidIndex(Index))
+	{
+		SlotStructArray[Index].Quantity += Quantity;
+	}
+}
+
+// Function to check all empty slots in the inventory
+FInventoryOperationResult UInventorySystemComponent::AnyEmptySlotsAvailable()
+{
+	for (int i = 0; i < SlotStructArray.Num(); ++i)
+	{
+		const auto& Slot = SlotStructArray[i];
+		if (Slot.Quantity == 0)
+		{
+			return { i, true };
+		}
+	}
+
+	return { -1, false };
+}
+
+// Function to create new stack items
+bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
+{
+	FInventoryOperationResult EmptySlotInfo = AnyEmptySlotsAvailable();
+
+	if (EmptySlotInfo.Success)
+	{
+		const int32& Index = EmptySlotInfo.Value;
+
+		if (SlotStructArray.IsValidIndex(Index))
+		{
+			SlotStructArray[Index].ID = ItemID;
+			SlotStructArray[Index].Quantity = Quantity;
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Function overlapping with item
@@ -148,11 +226,18 @@ void UInventorySystemComponent::Interact()
 {
 	if (LastLookedActor)
 	{
-		UItemDataComponent* ItemDataComponent = LastLookedActor->GetComponentByClass<UItemDataComponent>();
+		ItemDataComponent = LastLookedActor->GetComponentByClass<UItemDataComponent>();
 		if (ItemDataComponent)
 		{
 			IInteractInterface* ComponentInterface = Cast<IInteractInterface>(ItemDataComponent);
-			ComponentInterface->InteractWith();
+			if (ComponentInterface)
+			{
+				ACharacter* PlayerCharacter = Cast<ACharacter>(GetOwner());
+				if (PlayerCharacter)
+				{
+					ComponentInterface->InteractWith(PlayerCharacter);
+				}
+			}
 		}
 	}
 }

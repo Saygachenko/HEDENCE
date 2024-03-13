@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Containers/Map.h"
+#include "ItemDataComponent.h"
 #include "InventorySystemComponent.generated.h"
 
 // Struct information about a slot in your inventory
@@ -17,20 +17,20 @@ struct FSlotStruct
 	FName ID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Content")
-	int32 Quantity;
+	int32 Quantity = 0;
 };
 
-// Struct for return two variables for function FindSlot
+// Struct for return two variables for slots
 USTRUCT(BlueprintType)
-struct FSlotResult
+struct FInventoryOperationResult
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintRead)
-	int32 Index;
+	UPROPERTY(BlueprintReadOnly)
+	int32 Value;
 
-	UPROPERTY(BlueprintRead)
-	bool FoundSlot;
+	UPROPERTY(BlueprintReadOnly)
+	bool Success;
 };
 
 // In the future, the entire component needs to be replicated for online
@@ -50,6 +50,10 @@ public:
 	UFUNCTION()
 	void Interact();
 
+	// Function add to inventory
+	UFUNCTION(BlueprintCallable)
+	FInventoryOperationResult AddToInventory(FName ItemID, int32 Quantity);
+
 protected:
 	// We will need to replicate an array of the structure
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
@@ -67,25 +71,38 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	AActor* LastLookedActor = nullptr;
 
-	// Function add to inventory
-	UFUNCTION(BlueprintCallable)
-	void AddToInventory(FName ItemID, int32 Quantity);
-
-	// Function finded slot
-	UFUNCTION(BlueprintCallable)
-	FSlotResult FindSlot(FName ItemID);
+	// Called when the game starts
+	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
-	UDataTable* ItemsDataTable;
+	UItemDataComponent* ItemDataComponent = nullptr;
 
 	// Function remove to inventory
+	UFUNCTION(BlueprintCallable)
 	void RemoveFromInventory();
 
 	// Function overlapping with item
+	UFUNCTION(BlueprintCallable)
 	void InteractionTrace();
+
+	// Function finded slot
+	UFUNCTION(BlueprintCallable)
+	FInventoryOperationResult FindSlot(FName ItemID);
 
 	// Function get max stack size
 	UFUNCTION(BlueprintPure)
 	int32 GetMaxStackSize(FName ItemID);
+
+	// Function add to stack item in inventory
+	UFUNCTION(BlueprintCallable)
+	void AddToStack(int32 Index, int32 Quantity);
+
+	// Function to check all empty slots in the inventory
+	UFUNCTION(BlueprintPure)
+	FInventoryOperationResult AnyEmptySlotsAvailable();
+
+	// Function to create new stack items
+	UFUNCTION(BlueprintCallable)
+	bool CreateNewStack(FName ItemID, int32 Quantity);
 };

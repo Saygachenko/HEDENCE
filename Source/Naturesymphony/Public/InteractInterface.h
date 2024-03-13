@@ -28,5 +28,5 @@ public:
 
 	// Function interacting with item
 	UFUNCTION()
-	virtual void InteractWith();
+	virtual void InteractWith(ACharacter* PlayerCharacter);
 };

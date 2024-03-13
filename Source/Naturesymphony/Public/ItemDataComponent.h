@@ -22,16 +22,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
-	FDataTableRowHandle ItemID;
+	FDataTableRowHandle ItemDataTableRow;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	int32 Quantity = 1;
 
 	// Function of overriding interaction with interface item
-	virtual void InteractWith() override;
+	virtual void InteractWith(ACharacter* PlayerCharacter) override;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-		
+
 };

@@ -4,6 +4,8 @@
 #include "ItemDataComponent.h"
 
 #include "UObject/ConstructorHelpers.h"
+#include "GameFramework/Character.h"
+#include "InventorySystemComponent.h"
 
 // Sets default values for this component's properties
 UItemDataComponent::UItemDataComponent()
@@ -16,7 +18,7 @@ UItemDataComponent::UItemDataComponent()
 	ConstructorHelpers::FObjectFinder<UDataTable> DataTableAsset(TEXT("/Game/Naturesymphony/Inventory/ItemsData/DT_Items"));
 	if (DataTableAsset.Succeeded())
 	{
-		ItemID.DataTable = DataTableAsset.Object;
+		ItemDataTableRow.DataTable = DataTableAsset.Object;
 	}
 	else
 	{
@@ -43,7 +45,30 @@ void UItemDataComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 }
 
 // Function of overriding interaction with interface item
-void UItemDataComponent::InteractWith()
+void UItemDataComponent::InteractWith(ACharacter* Character)
 {
-	GetOwner()->Destroy();
+	if (Character)
+	{
+		UInventorySystemComponent* InventoryComponent = Character->FindComponentByClass<UInventorySystemComponent>();
+		if (InventoryComponent)
+		{
+			TObjectPtr<const UDataTable> DataTable = ItemDataTableRow.DataTable;
+			if (DataTable)
+			{
+				FName RowName = ItemDataTableRow.RowName;
+
+				FItemData* DataTableRow = DataTable->FindRow<FItemData>(RowName, "");
+				if (DataTableRow)
+				{
+					FName ItemID = DataTableRow->ID;
+
+					auto InventoryResult = InventoryComponent->AddToInventory(ItemID, Quantity);
+					if (InventoryResult.Success)
+					{
+						GetOwner()->Destroy();
+					}
+				}
+			}
+		}
+	}
 }

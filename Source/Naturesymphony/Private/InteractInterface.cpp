@@ -12,7 +12,7 @@ void IInteractInterface::LookAt()
 }
 
 // Function interacting with item
-void IInteractInterface::InteractWith()
+void IInteractInterface::InteractWith(ACharacter* Character)
 {
 
 }
