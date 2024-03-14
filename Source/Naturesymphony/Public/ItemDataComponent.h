@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	FDataTableRowHandle ItemDataTableRow;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data", meta = (ClampMin = 1, ClampMax = 999))
 	int32 Quantity = 1;
 
 	// Function of overriding interaction with interface item

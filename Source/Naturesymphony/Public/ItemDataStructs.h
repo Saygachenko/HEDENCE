@@ -25,7 +25,7 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	UTexture2D* Icon;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data", meta = (ClampMin = 1, ClampMax = 999))
 	int32 StackSize;
 
 };

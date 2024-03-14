@@ -18,7 +18,7 @@ class NATURESYMPHONY_API AMainPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 public:
-
+	// Function input Controller
 	virtual void SetupInputComponent() override;
 
 protected:
@@ -34,6 +34,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> InventoryMenuClass;
+
+	UPROPERTY()
+	UUserWidget* HUDScreen = nullptr;
+
+	UPROPERTY()
+	UUserWidget* InventoryMenu = nullptr;
 
 	// Function to open menu inventory
 	void OpenMenu();

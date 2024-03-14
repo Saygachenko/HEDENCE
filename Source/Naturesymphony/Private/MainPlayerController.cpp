@@ -6,17 +6,19 @@
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFrameWork/Character.h"
 
 // Called when the game starts
 void AMainPlayerController::BeginPlay()
 {
-	UUserWidget* HUDScreen = CreateWidget(this, HUDScreenClass);
+	HUDScreen = CreateWidget(this, HUDScreenClass);
 	if (HUDScreen != nullptr)
 	{
 		HUDScreen->AddToViewport();
 	}
 }
 
+// Function input Controller
 void AMainPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -27,11 +29,15 @@ void AMainPlayerController::SetupInputComponent()
 	}
 }
 
+// Function to open menu inventory
 void AMainPlayerController::OpenMenu()
 {
-	UUserWidget* InventoryMenu = CreateWidget(this, InventoryMenuClass);
-	if (InventoryMenu != nullptr)
+	if (IsLocalPlayerController())
 	{
-		InventoryMenu->AddToViewport();
+		InventoryMenu = CreateWidget(this, InventoryMenuClass);
+		if (InventoryMenu != nullptr)
+		{
+			InventoryMenu->AddToViewport();
+		}
 	}
 }
