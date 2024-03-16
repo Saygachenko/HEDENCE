@@ -105,24 +105,27 @@ int32 UInventorySystemComponent::GetMaxStackSize(FName ItemID)
 {
 	FName RowName = ItemID;
 	
-	TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
-	if (DataTable)
+	if (ItemDataComponent)
 	{
-		FItemData* ItemData = DataTable->FindRow<FItemData>(RowName, "");
-		if (ItemData)
+		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
+		if (DataTable)
 		{
-			int32 StackSize = ItemData->StackSize;
+			FItemData* ItemData = DataTable->FindRow<FItemData>(RowName, "");
+			if (ItemData)
+			{
+				int32 StackSize = ItemData->StackSize;
 
-			return StackSize;
+				return StackSize;
+			}
+			else
+			{
+				return -1;
+			}
 		}
 		else
 		{
-			return -1;
+			UE_LOG(LogTemp, Error, TEXT("Item data not found for ItemID: %s"), *ItemID.ToString());
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Item data not found for ItemID: %s"), *ItemID.ToString());
 	}
 
 	return 0;
@@ -176,7 +179,7 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 // Function for moving through slots
 void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
 {
-	FSlotStruct SourceSlotIndex = SourceInventory->SlotStructArray[SourceIndex];
+	FSlotStruct CopySourceSlotIndex = SourceInventory->SlotStructArray[SourceIndex];
 
 	if (DestinationIndex < 0)
 	{
@@ -184,14 +187,24 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 	}
 	else
 	{
-		if (SourceSlotIndex.ID == SlotStructArray[DestinationIndex].ID)
+		FSlotStruct DestinationSlotIndex = SlotStructArray[DestinationIndex];
+		if (CopySourceSlotIndex.ID == DestinationSlotIndex.ID)
 		{
-
+			int32 QuantitySlotsResult = CopySourceSlotIndex.Quantity + DestinationSlotIndex.Quantity - GetMaxStackSize(CopySourceSlotIndex.ID);
+			QuantitySlotsResult = FMath::Clamp(QuantitySlotsResult, 0, GetMaxStackSize(CopySourceSlotIndex.ID));
+			if (QuantitySlotsResult > 0)
+			{
+				SourceInventory->SlotStructArray[SourceIndex].Quantity = QuantitySlotsResult;
+				SlotStructArray[DestinationIndex].ID = CopySourceSlotIndex.ID;
+				int32 NewQuantity = CopySourceSlotIndex.Quantity + DestinationSlotIndex.Quantity;
+				SlotStructArray[DestinationIndex].Quantity = FMath::Clamp(NewQuantity, 0, GetMaxStackSize(CopySourceSlotIndex.ID));
+				OnInventoryUpdate.Broadcast();
+			}
 		}
 		else
 		{
 			SourceInventory->SlotStructArray[SourceIndex] = SlotStructArray[DestinationIndex];
-			SlotStructArray[DestinationIndex] = SourceSlotIndex;
+			SlotStructArray[DestinationIndex] = CopySourceSlotIndex;
 			OnInventoryUpdate.Broadcast();
 		}
 
