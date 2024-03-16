@@ -7,6 +7,8 @@
 #include "ItemDataComponent.h"
 #include "InventorySystemComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdateSignature);
+
 // Struct information about a slot in your inventory
 USTRUCT(BlueprintType)
 struct FSlotStruct
@@ -53,6 +55,9 @@ public:
 	// Function add to inventory
 	UFUNCTION(BlueprintCallable)
 	FInventoryOperationResult AddToInventory(FName ItemID, int32 Quantity);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInventoryUpdateSignature OnInventoryUpdate;
 
 protected:
 	// We will need to replicate an array of the structure
@@ -105,4 +110,8 @@ private:
 	// Function to create new stack items
 	UFUNCTION(BlueprintCallable)
 	bool CreateNewStack(FName ItemID, int32 Quantity);
+
+	// Function for moving through slots
+	UFUNCTION(BlueprintCallable)
+	void TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex);
 };

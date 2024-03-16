@@ -83,7 +83,7 @@ FInventoryOperationResult UInventorySystemComponent::FindSlot(FName ItemID)
 
 	for (int32 i = 0; i < SlotStructArray.Num(); ++i)
 	{
-		const auto& Slot = SlotStructArray[i];
+		FSlotStruct Slot = SlotStructArray[i];
 
 		FName SlotID = Slot.ID;
 		int32 SlotQuantity = Slot.Quantity;
@@ -140,7 +140,7 @@ void UInventorySystemComponent::AddToStack(int32 Index, int32 Quantity)
 // Function to check all empty slots in the inventory
 FInventoryOperationResult UInventorySystemComponent::AnyEmptySlotsAvailable()
 {
-	for (int i = 0; i < SlotStructArray.Num(); ++i)
+	for (int32 i = 0; i < SlotStructArray.Num(); ++i)
 	{
 		const auto& Slot = SlotStructArray[i];
 		if (Slot.Quantity == 0)
@@ -159,7 +159,7 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 
 	if (EmptySlotInfo.Success)
 	{
-		const int32& Index = EmptySlotInfo.Value;
+		int32 Index = EmptySlotInfo.Value;
 
 		if (SlotStructArray.IsValidIndex(Index))
 		{
@@ -171,6 +171,31 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 	}
 
 	return false;
+}
+
+// Function for moving through slots
+void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
+{
+	FSlotStruct SourceSlotIndex = SourceInventory->SlotStructArray[SourceIndex];
+
+	if (DestinationIndex < 0)
+	{
+
+	}
+	else
+	{
+		if (SourceSlotIndex.ID == SlotStructArray[DestinationIndex].ID)
+		{
+
+		}
+		else
+		{
+			SourceInventory->SlotStructArray[SourceIndex] = SlotStructArray[DestinationIndex];
+			SlotStructArray[DestinationIndex] = SourceSlotIndex;
+			OnInventoryUpdate.Broadcast();
+		}
+
+	}
 }
 
 // Function overlapping with item
