@@ -179,7 +179,7 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 // Function for moving through slots
 void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
 {
-	FSlotStruct CopySourceSlotIndex = SourceInventory->SlotStructArray[SourceIndex];
+	FSlotStruct CopySourceSlotArray = SourceInventory->SlotStructArray[SourceIndex];
 
 	if (DestinationIndex < 0)
 	{
@@ -188,23 +188,23 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 	else
 	{
 		FSlotStruct DestinationSlotIndex = SlotStructArray[DestinationIndex];
-		if (CopySourceSlotIndex.ID == DestinationSlotIndex.ID)
+		if (CopySourceSlotArray.ID == DestinationSlotIndex.ID)
 		{
-			int32 QuantitySlotsResult = CopySourceSlotIndex.Quantity + DestinationSlotIndex.Quantity - GetMaxStackSize(CopySourceSlotIndex.ID);
-			QuantitySlotsResult = FMath::Clamp(QuantitySlotsResult, 0, GetMaxStackSize(CopySourceSlotIndex.ID));
+			int32 QuantitySlotsResult = CopySourceSlotArray.Quantity + DestinationSlotIndex.Quantity - GetMaxStackSize(CopySourceSlotArray.ID);
+			QuantitySlotsResult = FMath::Clamp(QuantitySlotsResult, 0, GetMaxStackSize(CopySourceSlotArray.ID));
 			if (QuantitySlotsResult > 0)
 			{
 				SourceInventory->SlotStructArray[SourceIndex].Quantity = QuantitySlotsResult;
-				SlotStructArray[DestinationIndex].ID = CopySourceSlotIndex.ID;
-				int32 NewQuantity = CopySourceSlotIndex.Quantity + DestinationSlotIndex.Quantity;
-				SlotStructArray[DestinationIndex].Quantity = FMath::Clamp(NewQuantity, 0, GetMaxStackSize(CopySourceSlotIndex.ID));
+				SlotStructArray[DestinationIndex].ID = CopySourceSlotArray.ID;
+				int32 NewQuantity = CopySourceSlotArray.Quantity + DestinationSlotIndex.Quantity;
+				SlotStructArray[DestinationIndex].Quantity = FMath::Clamp(NewQuantity, 0, GetMaxStackSize(CopySourceSlotArray.ID));
 				OnInventoryUpdate.Broadcast();
 			}
 		}
 		else
 		{
 			SourceInventory->SlotStructArray[SourceIndex] = SlotStructArray[DestinationIndex];
-			SlotStructArray[DestinationIndex] = CopySourceSlotIndex;
+			SlotStructArray[DestinationIndex] = CopySourceSlotArray;
 			OnInventoryUpdate.Broadcast();
 		}
 
