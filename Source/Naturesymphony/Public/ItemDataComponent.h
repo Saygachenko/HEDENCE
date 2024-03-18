@@ -30,6 +30,8 @@ public:
 	// Function of overriding interaction with interface item
 	virtual void InteractWith(ACharacter* PlayerCharacter) override;
 
+	void SetStackSize(int32 NewStackSize) { Quantity = NewStackSize; };
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

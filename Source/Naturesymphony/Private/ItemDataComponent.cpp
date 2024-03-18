@@ -13,17 +13,6 @@ UItemDataComponent::UItemDataComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// Set defaults DataTable
-	ConstructorHelpers::FObjectFinder<UDataTable> DataTableAsset(TEXT("/Game/Naturesymphony/Inventory/ItemsData/DT_Items"));
-	if (DataTableAsset.Succeeded())
-	{
-		ItemDataTableRow.DataTable = DataTableAsset.Object;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DataTable asset not found!"));
-	}
 }
 
 // Called when the game starts

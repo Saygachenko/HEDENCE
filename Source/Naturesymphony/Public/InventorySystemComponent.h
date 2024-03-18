@@ -76,6 +76,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	AActor* LastLookedActor = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
+	float LineTraceLength = 150.0f;
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
@@ -85,7 +88,7 @@ private:
 
 	// Function remove to inventory
 	UFUNCTION(BlueprintCallable)
-	void RemoveFromInventory();
+	void RemoveFromInventory(int32 IndexSlot, bool RemoveStack /*bool IsConsumed*/);
 
 	// Function overlapping with item
 	UFUNCTION(BlueprintCallable)
@@ -97,7 +100,7 @@ private:
 
 	// Function get max stack size
 	UFUNCTION(BlueprintPure)
-	int32 GetMaxStackSize(FName ItemID);
+	int32 GetMaxStackSize(FName ItemID) { return GetItemData(ItemID).StackSize; };
 
 	// Function add to stack item in inventory
 	UFUNCTION(BlueprintCallable)
@@ -114,4 +117,20 @@ private:
 	// Function for moving through slots
 	UFUNCTION(BlueprintCallable)
 	void TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex);
+
+	// Function spawn item in world
+	UFUNCTION(BlueprintCallable)
+	void DropItem(FName ItemID, int32 Quantity);
+
+	// Function get item data row
+	UFUNCTION(BlueprintPure)
+	FItemData GetItemData(FName ItemID);
+
+	// Function item drop location on world
+	UFUNCTION(BlueprintPure)
+	FVector GetDropLocation();
+
+	// Function for button delete item of inventory
+	UFUNCTION(BlueprintCallable)
+	void DeleteFromInventory(int32 IndexSlot);
 };

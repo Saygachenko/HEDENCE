@@ -17,6 +17,9 @@ struct FItemData : public FTableRowBase
 	FName ID = FName();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
+	TSubclassOf<AActor> ItemClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	FText Name = FText::GetEmpty();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")

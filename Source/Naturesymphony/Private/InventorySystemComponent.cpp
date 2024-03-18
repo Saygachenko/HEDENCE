@@ -7,6 +7,7 @@
 #include "InteractInterface.h"
 #include "ItemDataComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/Actor.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -70,9 +71,24 @@ FInventoryOperationResult UInventorySystemComponent::AddToInventory(FName ItemID
 }
 
 // Function remove to inventory
-void UInventorySystemComponent::RemoveFromInventory()
+void UInventorySystemComponent::RemoveFromInventory(int32 IndexSlot, bool RemoveStack /*bool IsConsumed*/)
 {
+	FName LocalItem = SlotStructArray[IndexSlot].ID;
+	int32 LocalQuantity = SlotStructArray[IndexSlot].Quantity;
+	if (RemoveStack)
+	{
+		SlotStructArray[IndexSlot].ID = FName();
+		SlotStructArray[IndexSlot].Quantity = 0;
 
+		DropItem(LocalItem, LocalQuantity);
+
+		OnInventoryUpdate.Broadcast();
+		/*if (!IsConsumed)
+		{
+			DropItem(LocalItem, LocalQuantity);
+			OnInventoryUpdate.Broadcast();
+		}*/
+	}
 }
 
 // Function finded slot
@@ -98,37 +114,6 @@ FInventoryOperationResult UInventorySystemComponent::FindSlot(FName ItemID)
 	}
 
 	return { Index, FoundSlot };
-}
-
-// Function get max stack size
-int32 UInventorySystemComponent::GetMaxStackSize(FName ItemID)
-{
-	FName RowName = ItemID;
-	
-	if (ItemDataComponent)
-	{
-		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
-		if (DataTable)
-		{
-			FItemData* ItemData = DataTable->FindRow<FItemData>(RowName, "");
-			if (ItemData)
-			{
-				int32 StackSize = ItemData->StackSize;
-
-				return StackSize;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Item data not found for ItemID: %s"), *ItemID.ToString());
-		}
-	}
-
-	return 0;
 }
 
 // Function add to stack item in inventory
@@ -211,6 +196,31 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 	}
 }
 
+// Function spawn item in world
+void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
+{
+	TSubclassOf<AActor> ItemActorClass = GetItemData(ItemID).ItemClass;
+	if (ItemActorClass)
+	{
+		if (Quantity > 1)
+		{
+			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ItemActorClass, GetDropLocation(), FRotator::ZeroRotator);
+			if (SpawnedActor)
+			{
+				ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
+				if (ItemDataComponent)
+				{
+					ItemDataComponent->SetStackSize(Quantity);
+				}
+			}
+		}
+		else
+		{
+			GetWorld()->SpawnActor<AActor>(ItemActorClass, GetDropLocation(), FRotator::ZeroRotator);
+		}
+	}
+}
+
 // Function overlapping with item
 void UInventorySystemComponent::InteractionTrace()
 {
@@ -278,4 +288,51 @@ void UInventorySystemComponent::Interact()
 			}
 		}
 	}
+}
+
+// Function get item data row
+FItemData UInventorySystemComponent::GetItemData(FName ItemID)
+{
+	if (ItemDataComponent)
+	{
+		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
+		if (DataTable)
+		{
+			FItemData* ItemData = DataTable->FindRow<FItemData>(ItemID, "");
+			if (ItemData)
+			{
+				return *ItemData;
+			}
+		}
+	}
+
+	return FItemData();
+}
+
+// Function item drop location on world
+FVector UInventorySystemComponent::GetDropLocation()
+{
+	FVector Location = GetOwner()->GetActorLocation();
+	FVector ForwardLocation = GetOwner()->GetActorForwardVector() * LineTraceLength;
+	FVector StartLocation = Location + ForwardLocation;
+	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, 500.0f);
+	FHitResult HitResult;
+	
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 5.0f, 2.0f);
+	bool TraceHitResult = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_Visibility);
+	if (TraceHitResult)
+	{
+		return HitResult.Location;
+	}
+
+	return FVector::ZeroVector;
+}
+
+// Function for button delete item of inventory
+void UInventorySystemComponent::DeleteFromInventory(int32 IndexSlot)
+{
+	SlotStructArray[IndexSlot].ID = FName();
+	SlotStructArray[IndexSlot].Quantity = 0;
+
+	OnInventoryUpdate.Broadcast();
 }
