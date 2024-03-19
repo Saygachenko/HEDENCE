@@ -15,10 +15,10 @@ struct FSlotStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Content")
+	UPROPERTY(BlueprintReadWrite, Category = "Content")
 	FName ID;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Content")
+	UPROPERTY(BlueprintReadWrite, Category = "Content")
 	int32 Quantity = 0;
 };
 

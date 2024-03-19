@@ -8,6 +8,7 @@
 #include "ItemDataComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Actor.h"
+//#include "Templates/UnrealTemplate.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -164,35 +165,45 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 // Function for moving through slots
 void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
 {
-	FSlotStruct CopySourceSlotArray = SourceInventory->SlotStructArray[SourceIndex];
-
-	if (DestinationIndex < 0)
+	if (DestinationIndex > 0)
 	{
-
-	}
-	else
-	{
-		FSlotStruct DestinationSlotIndex = SlotStructArray[DestinationIndex];
-		if (CopySourceSlotArray.ID == DestinationSlotIndex.ID)
+		FSlotStruct& SourceSlot = SourceInventory->SlotStructArray[SourceIndex];
+		FSlotStruct& DestinationSlot = SlotStructArray[DestinationIndex];
+		if (SourceSlot.ID == DestinationSlot.ID)
 		{
-			int32 QuantitySlotsResult = CopySourceSlotArray.Quantity + DestinationSlotIndex.Quantity - GetMaxStackSize(CopySourceSlotArray.ID);
-			QuantitySlotsResult = FMath::Clamp(QuantitySlotsResult, 0, GetMaxStackSize(CopySourceSlotArray.ID));
-			if (QuantitySlotsResult > 0)
+			// Check for number in the index and maximum stack
+			if ((SourceSlot.Quantity == GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity != GetMaxStackSize(DestinationSlot.ID)) ||
+				(SourceSlot.Quantity != GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity == GetMaxStackSize(DestinationSlot.ID)) ||
+				(SourceSlot.Quantity == GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity == GetMaxStackSize(DestinationSlot.ID)))
 			{
-				SourceInventory->SlotStructArray[SourceIndex].Quantity = QuantitySlotsResult;
-				SlotStructArray[DestinationIndex].ID = CopySourceSlotArray.ID;
-				int32 NewQuantity = CopySourceSlotArray.Quantity + DestinationSlotIndex.Quantity;
-				SlotStructArray[DestinationIndex].Quantity = FMath::Clamp(NewQuantity, 0, GetMaxStackSize(CopySourceSlotArray.ID));
-				OnInventoryUpdate.Broadcast();
+				Swap(SourceInventory->SlotStructArray[SourceIndex], SlotStructArray[DestinationIndex]);
+			}
+			else
+			{
+				int32 TotalQuantity = SourceSlot.Quantity + DestinationSlot.Quantity - GetMaxStackSize(SourceSlot.ID);
+
+				if (TotalQuantity > 0)
+				{
+					DestinationSlot.Quantity = TotalQuantity;
+					DeleteFromInventory(SourceIndex);
+				}
+				else
+				{
+					DeleteFromInventory(SourceIndex);
+					DestinationSlot.Quantity = TotalQuantity;
+				}
 			}
 		}
 		else
 		{
-			SourceInventory->SlotStructArray[SourceIndex] = SlotStructArray[DestinationIndex];
-			SlotStructArray[DestinationIndex] = CopySourceSlotArray;
-			OnInventoryUpdate.Broadcast();
+			Swap(SourceInventory->SlotStructArray[SourceIndex], SlotStructArray[DestinationIndex]);
 		}
 
+		OnInventoryUpdate.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Find FSlotStuct check initial Quantity = 0"));
 	}
 }
 
