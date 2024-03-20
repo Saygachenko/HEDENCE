@@ -167,10 +167,13 @@ void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 // Function delegate death Character
 void AMainCharacter::OnDeath()
 {
-	GetCharacterMovement()->DisableMovement();
-	GetMesh()->SetSimulatePhysics(true);
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	SetLifeSpan(5.0f);
+	if (GetCharacterMovement() && GetMesh() && GetCapsuleComponent())
+	{
+		GetCharacterMovement()->DisableMovement();
+		GetMesh()->SetSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		SetLifeSpan(5.0f);
+	}
 }
 
 // Function delegate OnComponentBeginOverlap
