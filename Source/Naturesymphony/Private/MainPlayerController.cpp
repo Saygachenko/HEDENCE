@@ -12,7 +12,7 @@
 void AMainPlayerController::BeginPlay()
 {
 	HUDScreen = CreateWidget(this, HUDScreenClass);
-	if (HUDScreen != nullptr)
+	if (HUDScreen)
 	{
 		HUDScreen->AddToViewport();
 	}
@@ -32,12 +32,9 @@ void AMainPlayerController::SetupInputComponent()
 // Function to open menu inventory
 void AMainPlayerController::OpenMenu()
 {
-	if (IsLocalPlayerController())
+	InventoryMenu = CreateWidget(this, InventoryMenuClass);
+	if (InventoryMenu != nullptr)
 	{
-		InventoryMenu = CreateWidget(this, InventoryMenuClass);
-		if (InventoryMenu != nullptr)
-		{
-			InventoryMenu->AddToViewport();
-		}
+		InventoryMenu->AddToViewport();
 	}
 }
