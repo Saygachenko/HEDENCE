@@ -5,6 +5,7 @@
 
 #include "ItemDataComponent.h"
 #include "ItemDataStructs.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AActorInteractTest::AActorInteractTest()
@@ -16,6 +17,12 @@ AActorInteractTest::AActorInteractTest()
 	SetRootComponent(SceneComponent);
 
 	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
+
+	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("WidgetComponent"));
+	WidgetComponent->SetupAttachment(GetRootComponent());
+
+	WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	WidgetComponent->SetDrawAtDesiredSize(true);
 }
 
 // Called when the game starts or when spawned
@@ -33,7 +40,7 @@ void AActorInteractTest::Tick(float DeltaTime)
 }
 
 // Function overriding view on item of interface
-void AActorInteractTest::LookAt()
+FText AActorInteractTest::LookAt()
 {
 	if (ItemDataComponent)
 	{
@@ -45,8 +52,12 @@ void AActorInteractTest::LookAt()
 			FItemData* ItemStruct = DataTable->FindRow<FItemData>(RowName, "No appropriate row name!");
 			if (ItemStruct)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Pick up: %s"), *ItemStruct->Name.ToString());
+				FText Message = FText::FromString("E Pick up");
+
+				return Message;
 			}
 		}
 	}
+
+	return FText::GetEmpty();
 }

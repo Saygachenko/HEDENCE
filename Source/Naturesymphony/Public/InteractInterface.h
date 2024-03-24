@@ -24,7 +24,7 @@ class NATURESYMPHONY_API IInteractInterface
 public:
 	// Function overriding view on item
 	UFUNCTION()
-	virtual void LookAt();
+	virtual FText LookAt();
 
 	// Function interacting with item
 	UFUNCTION()

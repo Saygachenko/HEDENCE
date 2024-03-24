@@ -21,7 +21,7 @@ public:
 
 	// Function overriding view on item of interface
 	UFUNCTION(BlueprintCallable)
-	virtual void LookAt() override;
+	virtual FText LookAt() override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,4 +33,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UItemDataComponent* ItemDataComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UWidgetComponent* WidgetComponent;
 };

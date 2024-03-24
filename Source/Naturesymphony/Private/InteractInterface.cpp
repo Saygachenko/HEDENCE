@@ -6,9 +6,9 @@
 // Add default functionality here for any IInteractInterface functions that are not pure virtual.
 
 // Function overriding view on item
-void IInteractInterface::LookAt()
+FText IInteractInterface::LookAt()
 {
-
+	return FText::GetEmpty();
 }
 
 // Function interacting with item

@@ -8,7 +8,8 @@
 #include "ItemDataComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Actor.h"
-//#include "Templates/UnrealTemplate.h"
+#include "Components/WidgetComponent.h"
+#include "PickUpMessageWidget.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -267,16 +268,30 @@ void UInventorySystemComponent::InteractionTrace()
 				IInteractInterface* ActorInterface = Cast<IInteractInterface>(LookAtActor);
 				if (ActorInterface)
 				{
-					ActorInterface->LookAt();
-					LastLookedActor = LookAtActor;
-					LookAtActor = nullptr;
+					UWidgetComponent* WidgetComponent = LookAtActor->GetComponentByClass<UWidgetComponent>();
+					if (WidgetComponent)
+					{
+						PickUpMessageWidget = Cast<UPickUpMessageWidget>(WidgetComponent->GetUserWidgetObject());
+						if (PickUpMessageWidget)
+						{
+							PickUpMessageWidget->ShowMessage(ActorInterface->LookAt());
+
+							LastLookedActor = LookAtActor;
+							LookAtActor = nullptr;
+						}
+					}
 				}
 			}
 		}
 	}
 	else
 	{
-		LastLookedActor = nullptr;
+		if (PickUpMessageWidget)
+		{
+			PickUpMessageWidget->ShowMessage(FText::GetEmpty());
+			PickUpMessageWidget = nullptr;
+			LastLookedActor = nullptr;
+		}
 	}
 }
 

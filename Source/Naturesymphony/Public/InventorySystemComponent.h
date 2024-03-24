@@ -86,6 +86,9 @@ private:
 	UPROPERTY()
 	UItemDataComponent* ItemDataComponent = nullptr;
 
+	UPROPERTY()
+	class UPickUpMessageWidget* PickUpMessageWidget = nullptr;
+
 	// Function remove to inventory
 	UFUNCTION(BlueprintCallable)
 	void RemoveFromInventory(int32 IndexSlot, bool RemoveStack /*bool IsConsumed*/);
