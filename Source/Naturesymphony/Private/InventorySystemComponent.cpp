@@ -236,9 +236,13 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 // Function overlapping with item
 void UInventorySystemComponent::InteractionTrace()
 {
+	AActor* LastLookedActor = LookAtActor;
+
 	FVector TraceStartEnd = GetOwner()->GetActorLocation();
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+
+	// ObjectTypeQuery7 = new object channel name Interactive
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
 	
 	TArray<AActor*> ActorsToIgnore;
@@ -260,7 +264,7 @@ void UInventorySystemComponent::InteractionTrace()
 	if (SphereTraceResult)
 	{
 		LookAtActor = HitResult.GetActor();
-		if (LookAtActor != LastLookedActor)
+		if (LookAtActor && LookAtActor != LastLookedActor)
 		{
 			bool InterfaceResult = LookAtActor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass());
 			if (InterfaceResult)
@@ -275,10 +279,20 @@ void UInventorySystemComponent::InteractionTrace()
 						if (PickUpMessageWidget)
 						{
 							PickUpMessageWidget->ShowMessage(ActorInterface->LookAt());
-
-							LastLookedActor = LookAtActor;
-							LookAtActor = nullptr;
 						}
+					}
+				}
+			}
+
+			if (LastLookedActor)
+			{
+				UWidgetComponent* LastWidgetComponent = LastLookedActor->GetComponentByClass<UWidgetComponent>();
+				if (LastWidgetComponent)
+				{
+					UPickUpMessageWidget* LastPickUpMessageWidget = Cast<UPickUpMessageWidget>(LastWidgetComponent->GetUserWidgetObject());
+					if (LastPickUpMessageWidget)
+					{
+						LastPickUpMessageWidget->ShowMessage(FText::GetEmpty());
 					}
 				}
 			}
@@ -290,6 +304,7 @@ void UInventorySystemComponent::InteractionTrace()
 		{
 			PickUpMessageWidget->ShowMessage(FText::GetEmpty());
 			PickUpMessageWidget = nullptr;
+			LookAtActor = nullptr;
 			LastLookedActor = nullptr;
 		}
 	}
@@ -298,9 +313,9 @@ void UInventorySystemComponent::InteractionTrace()
 // Function Interact with item
 void UInventorySystemComponent::Interact()
 {
-	if (LastLookedActor)
+	if (LookAtActor)
 	{
-		ItemDataComponent = LastLookedActor->GetComponentByClass<UItemDataComponent>();
+		ItemDataComponent = LookAtActor->GetComponentByClass<UItemDataComponent>();
 		if (ItemDataComponent)
 		{
 			IInteractInterface* ComponentInterface = Cast<IInteractInterface>(ItemDataComponent);

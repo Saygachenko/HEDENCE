@@ -73,9 +73,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	AActor* LookAtActor = nullptr;
 
-	UPROPERTY(BlueprintReadWrite)
-	AActor* LastLookedActor = nullptr;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
 	float LineTraceLength = 150.0f;
 
