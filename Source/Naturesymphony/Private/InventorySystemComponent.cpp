@@ -214,21 +214,27 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 	TSubclassOf<AActor> ItemActorClass = GetItemData(ItemID).ItemClass;
 	if (ItemActorClass)
 	{
-		if (Quantity > 1)
+		FVector OwnerLocation = GetOwner()->GetActorLocation();
+		FVector OwnerForwardLocation = GetOwner()->GetActorForwardVector() * DropLineTraceLength;
+		FVector StartLocation = OwnerLocation + OwnerForwardLocation;
+
+		if (Quantity >= 1)
 		{
-			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ItemActorClass, GetDropLocation(), FRotator::ZeroRotator);
+			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ItemActorClass, StartLocation, FRotator::ZeroRotator);
 			if (SpawnedActor)
 			{
-				ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
-				if (ItemDataComponent)
+				UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
+				if (MeshComponent)
 				{
-					ItemDataComponent->SetStackSize(Quantity);
+					MeshComponent->AddImpulse(OwnerForwardLocation * ImpulseVelocity, NAME_None, false);
+
+					ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
+					if (ItemDataComponent)
+					{
+						ItemDataComponent->SetStackSize(Quantity);
+					}
 				}
 			}
-		}
-		else
-		{
-			GetWorld()->SpawnActor<AActor>(ItemActorClass, GetDropLocation(), FRotator::ZeroRotator);
 		}
 	}
 }
@@ -348,25 +354,6 @@ FItemData UInventorySystemComponent::GetItemData(FName ItemID)
 	}
 
 	return FItemData();
-}
-
-// Function item drop location on world
-FVector UInventorySystemComponent::GetDropLocation()
-{
-	FVector Location = GetOwner()->GetActorLocation();
-	FVector ForwardLocation = GetOwner()->GetActorForwardVector() * LineTraceLength;
-	FVector StartLocation = Location + ForwardLocation;
-	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, 500.0f);
-	FHitResult HitResult;
-	
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 5.0f, 2.0f);
-	bool TraceHitResult = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_Visibility);
-	if (TraceHitResult)
-	{
-		return HitResult.Location;
-	}
-
-	return FVector::ZeroVector;
 }
 
 // Function for button delete item of inventory

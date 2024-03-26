@@ -6,6 +6,7 @@
 #include "ItemDataComponent.h"
 #include "ItemDataStructs.h"
 #include "Components/WidgetComponent.h"
+//#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AActorInteractTest::AActorInteractTest()
@@ -13,8 +14,8 @@ AActorInteractTest::AActorInteractTest()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SceneComponent = CreateDefaultSubobject<USceneComponent>(FName("SceneComponent"));
-	SetRootComponent(SceneComponent);
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
+	SetRootComponent(StaticMeshComponent);
 
 	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
 

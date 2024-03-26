@@ -74,7 +74,10 @@ protected:
 	AActor* LookAtActor = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
-	float LineTraceLength = 150.0f;
+	float DropLineTraceLength = 150.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
+	float ImpulseVelocity = 100.0f;
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -125,10 +128,6 @@ private:
 	// Function get item data row
 	UFUNCTION(BlueprintPure)
 	FItemData GetItemData(FName ItemID);
-
-	// Function item drop location on world
-	UFUNCTION(BlueprintPure)
-	FVector GetDropLocation();
 
 	// Function for button delete item of inventory
 	UFUNCTION(BlueprintCallable)
