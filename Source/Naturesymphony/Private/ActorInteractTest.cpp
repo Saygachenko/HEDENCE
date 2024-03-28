@@ -6,7 +6,6 @@
 #include "ItemDataComponent.h"
 #include "ItemDataStructs.h"
 #include "Components/WidgetComponent.h"
-//#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AActorInteractTest::AActorInteractTest()

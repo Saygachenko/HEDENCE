@@ -30,4 +30,7 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data", meta = (ClampMin = 1, ClampMax = 999))
 	int32 StackSize = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
+	TSubclassOf<class AItemEffect> ItemEffect;
 };

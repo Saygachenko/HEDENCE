@@ -91,7 +91,7 @@ private:
 
 	// Function remove to inventory
 	UFUNCTION(BlueprintCallable)
-	void RemoveFromInventory(int32 IndexSlot, bool RemoveStack /*bool IsConsumed*/);
+	void RemoveFromInventory(int32 IndexSlot, bool RemoveStack, bool IsConsumed);
 
 	// Function overlapping with item
 	UFUNCTION(BlueprintCallable)
@@ -129,7 +129,7 @@ private:
 	UFUNCTION(BlueprintPure)
 	FItemData GetItemData(FName ItemID);
 
-	// Function for button delete item of inventory
+	// Function for button Use item of inventory
 	UFUNCTION(BlueprintCallable)
-	void DeleteFromInventory(int32 IndexSlot);
+	void ConsumeItem(int32 IndexSlot);
 };

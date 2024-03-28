@@ -10,6 +10,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
 #include "PickUpMessageWidget.h"
+#include "ItemEffect.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -73,7 +74,7 @@ FInventoryOperationResult UInventorySystemComponent::AddToInventory(FName ItemID
 }
 
 // Function remove to inventory
-void UInventorySystemComponent::RemoveFromInventory(int32 IndexSlot, bool RemoveStack /*bool IsConsumed*/)
+void UInventorySystemComponent::RemoveFromInventory(int32 IndexSlot, bool RemoveStack, bool IsConsumed)
 {
 	FName LocalItem = SlotStructArray[IndexSlot].ID;
 	int32 LocalQuantity = SlotStructArray[IndexSlot].Quantity;
@@ -83,14 +84,29 @@ void UInventorySystemComponent::RemoveFromInventory(int32 IndexSlot, bool Remove
 		SlotStructArray[IndexSlot].Quantity = 0;
 
 		DropItem(LocalItem, LocalQuantity);
-
-		OnInventoryUpdate.Broadcast();
-		/*if (!IsConsumed)
-		{
-			DropItem(LocalItem, LocalQuantity);
-			OnInventoryUpdate.Broadcast();
-		}*/
 	}
+	else
+	{
+		if (IsConsumed)
+		{
+			if (SlotStructArray[IndexSlot].Quantity > 1)
+			{
+				SlotStructArray[IndexSlot].Quantity--;
+			}
+			else
+			{
+				SlotStructArray[IndexSlot].ID = FName();
+				SlotStructArray[IndexSlot].Quantity = 0;
+			}
+		}
+		else // Delete slot data the item.
+		{
+			SlotStructArray[IndexSlot].ID = FName();
+			SlotStructArray[IndexSlot].Quantity = 0;
+		}
+	}
+
+	OnInventoryUpdate.Broadcast();
 }
 
 // Function finded slot
@@ -186,11 +202,11 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 				if (TotalQuantity > 0)
 				{
 					DestinationSlot.Quantity = TotalQuantity;
-					DeleteFromInventory(SourceIndex);
+					RemoveFromInventory(SourceIndex, false, false);
 				}
 				else
 				{
-					DeleteFromInventory(SourceIndex);
+					RemoveFromInventory(SourceIndex, false, false);
 					DestinationSlot.Quantity = TotalQuantity;
 				}
 			}
@@ -199,13 +215,13 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 		{
 			Swap(SourceInventory->SlotStructArray[SourceIndex], SlotStructArray[DestinationIndex]);
 		}
-
-		OnInventoryUpdate.Broadcast();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Find FSlotStuct check initial Quantity = 0"));
 	}
+
+	OnInventoryUpdate.Broadcast();
 }
 
 // Function spawn item in world
@@ -356,11 +372,24 @@ FItemData UInventorySystemComponent::GetItemData(FName ItemID)
 	return FItemData();
 }
 
-// Function for button delete item of inventory
-void UInventorySystemComponent::DeleteFromInventory(int32 IndexSlot)
+// Function for button Use item of inventory
+void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 {
-	SlotStructArray[IndexSlot].ID = FName();
-	SlotStructArray[IndexSlot].Quantity = 0;
+	FSlotStruct ConsumeItemIndex = SlotStructArray[IndexSlot];
+	FName ConsumeID = ConsumeItemIndex.ID;
+
+	auto ItemEffectData = GetItemData(ConsumeID).ItemEffect;
+	if (ItemEffectData)
+	{
+		FVector OwnerLocation = GetOwner()->GetActorLocation();
+
+		AItemEffect* ItemEffect = GetWorld()->SpawnActor<AItemEffect>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
+
+		if (ItemEffect)
+		{
+			RemoveFromInventory(IndexSlot, false, true);
+		}
+	}
 
 	OnInventoryUpdate.Broadcast();
 }
