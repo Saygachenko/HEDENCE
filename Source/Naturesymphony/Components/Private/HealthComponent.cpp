@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "HealthComponent.h"
+#include "Naturesymphony/Components/Public/HealthComponent.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()

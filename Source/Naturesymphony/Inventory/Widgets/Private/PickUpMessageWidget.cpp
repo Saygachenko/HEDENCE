@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PickUpMessageWidget.h"
+#include "Naturesymphony/Inventory/Widgets/Public/PickUpMessageWidget.h"
 
 #include "Components/TextBlock.h"
 

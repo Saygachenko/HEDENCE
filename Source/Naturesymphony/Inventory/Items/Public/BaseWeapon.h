@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemEffect.h"
-#include "EquipmentEffect.generated.h"
+#include "Naturesymphony/Inventory/Items/Public/InventoryItem.h"
+#include "BaseWeapon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class NATURESYMPHONY_API AEquipmentEffect : public AItemEffect
+class NATURESYMPHONY_API ABaseWeapon : public AInventoryItem
 {
 	GENERATED_BODY()
 	

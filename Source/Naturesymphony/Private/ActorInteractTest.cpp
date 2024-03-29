@@ -3,8 +3,8 @@
 
 #include "ActorInteractTest.h"
 
-#include "ItemDataComponent.h"
-#include "ItemDataStructs.h"
+#include "Naturesymphony/Components/Public/ItemDataComponent.h"
+#include "Naturesymphony/Inventory/Public/ItemDataStructs.h"
 #include "Components/WidgetComponent.h"
 
 // Sets default values

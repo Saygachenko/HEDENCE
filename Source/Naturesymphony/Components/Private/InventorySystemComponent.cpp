@@ -1,16 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "InventorySystemComponent.h"
+#include "Naturesymphony/Components/Public/InventorySystemComponent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
-#include "InteractInterface.h"
-#include "ItemDataComponent.h"
+#include "Naturesymphony/Inventory/Public/InteractInterface.h"
+#include "Naturesymphony/Components/Public/ItemDataComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
-#include "PickUpMessageWidget.h"
-#include "ItemEffect.h"
+#include "Naturesymphony/Inventory/Widgets/Public/PickUpMessageWidget.h"
+#include "Naturesymphony/Inventory/Items/Effects/Public/ItemEffect.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()

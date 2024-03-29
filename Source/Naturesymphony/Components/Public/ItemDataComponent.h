@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ItemDataStructs.h"
-#include "InteractInterface.h"
+#include "Naturesymphony/Inventory/Public/ItemDataStructs.h"
+#include "Naturesymphony/Inventory/Public/InteractInterface.h"
 #include "ItemDataComponent.generated.h"
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UItemDataComponent : public UActorComponent, public IInteractInterface

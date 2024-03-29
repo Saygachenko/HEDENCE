@@ -7,7 +7,6 @@
 #include "GameFramework/Actor.h"
 #include "ItemDataStructs.generated.h"
 
-
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "InteractInterface.h"
+#include "Naturesymphony/Inventory/Public/InteractInterface.h"
 #include "ActorInteractTest.generated.h"
 
 UCLASS()

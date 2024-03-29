@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "WeaponComponent.h"
+#include "Naturesymphony/Components/Public/WeaponComponent.h"
 
 //#include "BaseWeaponActor.h"
 #include "GameFrameWork/Character.h"

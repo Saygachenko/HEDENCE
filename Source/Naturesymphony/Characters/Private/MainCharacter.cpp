@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "MainCharacter.h"
+#include "Naturesymphony/Characters/Public/MainCharacter.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "HealthComponent.h"
+#include "Naturesymphony/Components/Public/HealthComponent.h"
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
@@ -14,7 +14,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
-#include "InventorySystemComponent.h"
+#include "Naturesymphony/Components/Public/InventorySystemComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
