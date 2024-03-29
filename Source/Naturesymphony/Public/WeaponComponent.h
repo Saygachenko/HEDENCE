@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "WeaponComponent.generated.h"
 
-class ABaseWeaponActor;
+//class ABaseWeaponActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UWeaponComponent : public UActorComponent
@@ -25,12 +25,13 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+public:
 	// Function equipping weapon
 	void EquippingWeapon();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
-	TSubclassOf<ABaseWeaponActor> WeaponClass;
+	/*UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	TSubclassOf<ABaseWeaponActor> WeaponClass;*/
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
 	FName MeleeWeaponAttachSocketName = "MeleeHipSocket";
@@ -44,8 +45,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* UnEquipAnimMontage;
 
-	UPROPERTY(BlueprintReadWrite)
-	ABaseWeaponActor* CurrentWeapon = nullptr;
+	//UPROPERTY(BlueprintReadWrite)
+	//ABaseWeaponActor* CurrentWeapon = nullptr;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsEquiped = false;

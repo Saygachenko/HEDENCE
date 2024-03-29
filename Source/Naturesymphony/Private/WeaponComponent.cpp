@@ -3,7 +3,7 @@
 
 #include "WeaponComponent.h"
 
-#include "BaseWeaponActor.h"
+//#include "BaseWeaponActor.h"
 #include "GameFrameWork/Character.h"
 
 // Sets default values for this component's properties
@@ -28,16 +28,16 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if (CurrentWeapon)
+	/*if (CurrentWeapon)
 	{
 		CurrentWeapon->Destroy();
-	}
+	}*/
 }
 
 // Function spawn weapons
 void UWeaponComponent::SpawnWeapons()
 {
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	/*ACharacter* Character = Cast<ACharacter>(GetOwner());
 	if (Character && WeaponClass)
 	{
 		ABaseWeaponActor* Weapon = GetWorld()->SpawnActor<ABaseWeaponActor>(WeaponClass);
@@ -46,13 +46,13 @@ void UWeaponComponent::SpawnWeapons()
 			CurrentWeapon = Weapon;
 			CurrentWeapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MeleeWeaponAttachSocketName);
 		}
-	}
+	}*/
 }
 
 // Function equipping weapon
 void UWeaponComponent::EquippingWeapon()
 {
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	/*ACharacter* Character = Cast<ACharacter>(GetOwner());
 	if (Character && CurrentWeapon && bIsAnimFinished)
 	{
 		bIsAnimFinished = false;
@@ -66,5 +66,5 @@ void UWeaponComponent::EquippingWeapon()
 			Character->PlayAnimMontage(UnEquipAnimMontage);
 			bIsEquiped = false;
 		}
-	}
+	}*/
 }

@@ -1,20 +1,27 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BaseWeaponActor.h"
+#include "InventoryItem.h"
 
 // Sets default values
-ABaseWeaponActor::ABaseWeaponActor()
+AInventoryItem::AInventoryItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
-	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMeshComponent"));
-	RootComponent = SkeletalMeshComponent;
 }
 
 // Called when the game starts or when spawned
-void ABaseWeaponActor::BeginPlay()
+void AInventoryItem::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
+
+// Called every frame
+void AInventoryItem::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
