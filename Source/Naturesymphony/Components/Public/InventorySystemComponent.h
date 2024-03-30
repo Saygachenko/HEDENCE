@@ -132,4 +132,16 @@ private:
 	// Function for button Use item of inventory
 	UFUNCTION(BlueprintCallable)
 	void ConsumeItem(int32 IndexSlot);
+
+	// Function for SaveInventory
+	UFUNCTION(BlueprintCallable)
+	void SaveInventory();
+
+	// Function for LoadInventory
+	UFUNCTION(BlueprintCallable)
+	void LoadInventory();
+
+	// Function for GetHFGameInstance
+	UFUNCTION(BlueprintCallable)
+	class UHFGameInstance* GetHFGameInstance();
 };

@@ -11,6 +11,9 @@
 #include "Components/WidgetComponent.h"
 #include "Naturesymphony/Inventory/Widgets/Public/PickUpMessageWidget.h"
 #include "Naturesymphony/Inventory/Items/Effects/Public/ItemEffect.h"
+#include "HFGameInstance.h"
+#include "Naturesymphony/SaveGame/Public/SaveDataPlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -25,7 +28,10 @@ void UInventorySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	LoadInventory();
 	SlotStructArray.SetNum(InventorySize);
+
+	OnInventoryUpdate.AddDynamic(this, &UInventorySystemComponent::SaveInventory);
 }
 
 // Called every frame
@@ -69,6 +75,8 @@ FInventoryOperationResult UInventorySystemComponent::AddToInventory(FName ItemID
 			}
 		}
 	}
+
+	OnInventoryUpdate.Broadcast();
 
 	return { QuantityRemaining, !HasFailed };
 }
@@ -392,4 +400,47 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 	}
 
 	OnInventoryUpdate.Broadcast();
+}
+
+// Function for SaveInventory
+void UInventorySystemComponent::SaveInventory()
+{
+	FString GameDataSlot = GetHFGameInstance()->GameDataSlot;
+
+	USaveDataPlayer* SaveDataPlayer = GetHFGameInstance()->SaveDataPlayerClass.GetDefaultObject();
+	if (SaveDataPlayer)
+	{
+		SaveDataPlayer->SaveSlotStructArray = SlotStructArray;
+		UGameplayStatics::SaveGameToSlot(SaveDataPlayer, GameDataSlot, 0);
+	}
+}
+
+// Function for LoadInventory
+void UInventorySystemComponent::LoadInventory()
+{
+	USaveDataPlayer* SaveDataPlayer = GetHFGameInstance()->SaveDataPlayerClass.GetDefaultObject();
+	if (SaveDataPlayer)
+	{
+		SlotStructArray = SaveDataPlayer->SaveSlotStructArray;
+	}
+}
+
+// Function for GetHFGameInstance
+UHFGameInstance* UInventorySystemComponent::GetHFGameInstance()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameInstance* GameInstance = World->GetGameInstance();
+		if (GameInstance)
+		{
+			UHFGameInstance* HFGameInstance = Cast<UHFGameInstance>(GameInstance);
+			if (HFGameInstance)
+			{
+				return HFGameInstance;
+			}
+		}
+	}
+
+	return nullptr;
 }
