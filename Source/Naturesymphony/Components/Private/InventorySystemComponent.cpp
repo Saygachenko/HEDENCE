@@ -184,6 +184,8 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 		}
 	}
 
+	OnInventoryUpdate.Broadcast();
+
 	return false;
 }
 
@@ -196,32 +198,42 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 		FSlotStruct& DestinationSlot = SlotStructArray[DestinationIndex];
 		if (SourceSlot.ID == DestinationSlot.ID)
 		{
+			int32 SourceMaxStackSize = GetMaxStackSize(SourceSlot.ID);
+			int32 DestinationMaxStackSize = GetMaxStackSize(DestinationSlot.ID);
+
 			// Check for number in the index and maximum stack
-			if ((SourceSlot.Quantity == GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity != GetMaxStackSize(DestinationSlot.ID)) ||
-				(SourceSlot.Quantity != GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity == GetMaxStackSize(DestinationSlot.ID)) ||
-				(SourceSlot.Quantity == GetMaxStackSize(SourceSlot.ID) && DestinationSlot.Quantity == GetMaxStackSize(DestinationSlot.ID)))
+			if (SourceSlot.Quantity == SourceMaxStackSize && DestinationSlot.Quantity != DestinationMaxStackSize)
 			{
-				Swap(SourceInventory->SlotStructArray[SourceIndex], SlotStructArray[DestinationIndex]);
+				Swap(SourceSlot, DestinationSlot);
+			}
+			else if (SourceSlot.Quantity != SourceMaxStackSize && DestinationSlot.Quantity == DestinationMaxStackSize)
+			{
+				Swap(SourceSlot, DestinationSlot);
+			}
+			else if (SourceSlot.Quantity == SourceMaxStackSize && DestinationSlot.Quantity == DestinationMaxStackSize)
+			{
+				Swap(SourceSlot, DestinationSlot);
 			}
 			else
 			{
-				int32 TotalQuantity = SourceSlot.Quantity + DestinationSlot.Quantity - GetMaxStackSize(SourceSlot.ID);
+				int32 TotalQuantity = SourceSlot.Quantity + DestinationSlot.Quantity;
 
-				if (TotalQuantity > 0)
+				if (TotalQuantity <= SourceMaxStackSize)
 				{
 					DestinationSlot.Quantity = TotalQuantity;
 					RemoveFromInventory(SourceIndex, false, false);
 				}
 				else
 				{
-					RemoveFromInventory(SourceIndex, false, false);
-					DestinationSlot.Quantity = TotalQuantity;
+					int32 RemainingQuantity = TotalQuantity - SourceMaxStackSize;
+					SourceSlot.Quantity = RemainingQuantity;
+					DestinationSlot.Quantity = SourceMaxStackSize;
 				}
 			}
 		}
 		else
 		{
-			Swap(SourceInventory->SlotStructArray[SourceIndex], SlotStructArray[DestinationIndex]);
+			Swap(SourceSlot, DestinationSlot);
 		}
 	}
 	else
@@ -242,7 +254,7 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 		FVector OwnerForwardLocation = GetOwner()->GetActorForwardVector() * DropLineTraceLength;
 		FVector StartLocation = OwnerLocation + OwnerForwardLocation;
 
-		if (Quantity >= 1)
+		if (Quantity > 0)
 		{
 			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ItemActorClass, StartLocation, FRotator::ZeroRotator);
 			if (SpawnedActor)
@@ -335,7 +347,6 @@ void UInventorySystemComponent::InteractionTrace()
 			PickUpMessageWidget->ShowMessage(FText::GetEmpty());
 			PickUpMessageWidget = nullptr;
 			LookAtActor = nullptr;
-			LastLookedActor = nullptr;
 		}
 	}
 }
@@ -366,10 +377,10 @@ FItemData UInventorySystemComponent::GetItemData(FName ItemID)
 {
 	if (ItemDataComponent)
 	{
-		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
+		const UDataTable* DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
 		if (DataTable)
 		{
-			FItemData* ItemData = DataTable->FindRow<FItemData>(ItemID, "");
+			const FItemData* ItemData = DataTable->FindRow<FItemData>(ItemID, "");
 			if (ItemData)
 			{
 				return *ItemData;
@@ -443,4 +454,25 @@ UHFGameInstance* UInventorySystemComponent::GetHFGameInstance()
 	}
 
 	return nullptr;
+}
+
+// Function for button Split item of inventory
+void UInventorySystemComponent::SplitItem(int32 IndexSlot)
+{
+	FSlotStruct& SlotArray = SlotStructArray[IndexSlot];
+	FName SlotID = SlotArray.ID;
+	int32 SlotQuantity = SlotArray.Quantity;
+
+	if (SlotQuantity > 1)
+	{
+		int32 Divide = FMath::DivideAndRoundUp(SlotQuantity, 2);
+
+		bool NewStackItem = CreateNewStack(SlotID, Divide);
+		if (NewStackItem)
+		{
+			SlotStructArray[IndexSlot].Quantity = SlotQuantity - Divide;
+		}
+	}
+
+	OnInventoryUpdate.Broadcast();
 }

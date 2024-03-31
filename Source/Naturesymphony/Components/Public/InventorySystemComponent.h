@@ -16,7 +16,7 @@ struct FSlotStruct
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, Category = "Content")
-	FName ID;
+	FName ID = FName();
 
 	UPROPERTY(BlueprintReadWrite, Category = "Content")
 	int32 Quantity = 0;
@@ -29,10 +29,10 @@ struct FInventoryOperationResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
-	int32 Value;
+	int32 Value = 0;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool Success;
+	bool Success = false;
 };
 
 // In the future, the entire component needs to be replicated for online
@@ -144,4 +144,8 @@ private:
 	// Function for GetHFGameInstance
 	UFUNCTION(BlueprintCallable)
 	class UHFGameInstance* GetHFGameInstance();
+
+	// Function for button Split item of inventory
+	UFUNCTION(BlueprintCallable)
+	void SplitItem(int32 IndexSlot);
 };
