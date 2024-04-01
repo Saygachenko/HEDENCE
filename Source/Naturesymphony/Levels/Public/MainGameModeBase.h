@@ -14,4 +14,14 @@ class NATURESYMPHONY_API AMainGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void BeginPlay() override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
+	TSubclassOf<class USaveDataLevel> SaveDataLevelClass;
+
+private:
+	UPROPERTY()
+	class USaveGame* LoadGameDataLevel;
 };

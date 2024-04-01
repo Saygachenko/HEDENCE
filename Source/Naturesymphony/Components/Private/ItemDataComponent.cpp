@@ -36,25 +36,30 @@ void UItemDataComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 // Function of overriding interaction with interface item
 void UItemDataComponent::InteractWith(ACharacter* Character)
 {
-	if (Character)
+	const UDataTable* DataTable = ItemDataTableRow.DataTable;
+	if (DataTable)
 	{
-		UInventorySystemComponent* InventoryComponent = Character->FindComponentByClass<UInventorySystemComponent>();
-		if (InventoryComponent)
+		FName RowName = ItemDataTableRow.RowName;
+
+		const FItemData* DataTableRow = DataTable->FindRow<FItemData>(RowName, "");
+		if (DataTableRow)
 		{
-			TObjectPtr<const UDataTable> DataTable = ItemDataTableRow.DataTable;
-			if (DataTable)
+			FName ItemID = DataTableRow->ID;
+
+			ACharacter* PlayerCharacter = Character;
+			if (PlayerCharacter)
 			{
-				FName RowName = ItemDataTableRow.RowName;
-
-				FItemData* DataTableRow = DataTable->FindRow<FItemData>(RowName, "");
-				if (DataTableRow)
+				UInventorySystemComponent* InventoryComponent = PlayerCharacter->FindComponentByClass<UInventorySystemComponent>();
+				if (InventoryComponent)
 				{
-					FName ItemID = DataTableRow->ID;
-
-					auto InventoryResult = InventoryComponent->AddToInventory(ItemID, Quantity);
+					FInventoryOperationResult InventoryResult = InventoryComponent->AddToInventory(ItemID, PickUpQuantity);
 					if (InventoryResult.Success)
 					{
-						GetOwner()->Destroy();
+						AActor* OwnerComponent = GetOwner();
+						if (OwnerComponent)
+						{
+							OwnerComponent->Destroy();
+						}
 					}
 				}
 			}

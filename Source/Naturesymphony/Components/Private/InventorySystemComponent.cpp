@@ -184,8 +184,6 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 		}
 	}
 
-	OnInventoryUpdate.Broadcast();
-
 	return false;
 }
 
@@ -267,7 +265,7 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 					ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
 					if (ItemDataComponent)
 					{
-						ItemDataComponent->SetStackSize(Quantity);
+						ItemDataComponent->SetPickUpStackSize(Quantity);
 					}
 				}
 			}
@@ -397,7 +395,7 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 	FSlotStruct ConsumeItemIndex = SlotStructArray[IndexSlot];
 	FName ConsumeID = ConsumeItemIndex.ID;
 
-	auto ItemEffectData = GetItemData(ConsumeID).ItemEffect;
+	TSubclassOf<AItemEffect> ItemEffectData = GetItemData(ConsumeID).ItemEffect;
 	if (ItemEffectData)
 	{
 		FVector OwnerLocation = GetOwner()->GetActorLocation();
@@ -416,7 +414,7 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 // Function for SaveInventory
 void UInventorySystemComponent::SaveInventory()
 {
-	FString GameDataSlot = GetHFGameInstance()->GameDataSlot;
+	FString GameDataSlot = GetHFGameInstance()->GameDataPlayerSlot;
 
 	USaveDataPlayer* SaveDataPlayer = GetHFGameInstance()->SaveDataPlayerClass.GetDefaultObject();
 	if (SaveDataPlayer)
@@ -437,7 +435,7 @@ void UInventorySystemComponent::LoadInventory()
 }
 
 // Function for GetHFGameInstance
-UHFGameInstance* UInventorySystemComponent::GetHFGameInstance()
+UHFGameInstance* UInventorySystemComponent::GetHFGameInstance() const
 {
 	UWorld* World = GetWorld();
 	if (World)

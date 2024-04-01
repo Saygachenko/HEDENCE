@@ -24,12 +24,12 @@ public:
 	FDataTableRowHandle ItemDataTableRow;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data", meta = (ClampMin = 1, ClampMax = 999))
-	int32 Quantity = 1;
+	int32 PickUpQuantity = 1;
 
 	// Function of overriding interaction with interface item
 	virtual void InteractWith(ACharacter* PlayerCharacter) override;
 
-	void SetStackSize(int32 NewStackSize) { Quantity = NewStackSize; };
+	void SetPickUpStackSize(int32 NewPickUpStackSize) { PickUpQuantity = NewPickUpStackSize; };
 
 protected:
 	// Called when the game starts

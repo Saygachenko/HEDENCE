@@ -15,7 +15,7 @@ class NATURESYMPHONY_API UHFGameInstance : public UGameInstance
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
-	FString GameDataSlot = "GameData";
+	FString GameDataPlayerSlot = "GameDataPlayer";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
 	TSubclassOf<class USaveDataPlayer> SaveDataPlayerClass;
@@ -25,5 +25,5 @@ public:
 
 private:
 	UPROPERTY()
-	class USaveGame* LoadGameData;
+	class USaveGame* LoadGameDataPlayer;
 };

@@ -13,5 +13,17 @@ UCLASS()
 class NATURESYMPHONY_API ABaseWeapon : public AInventoryItem
 {
 	GENERATED_BODY()
-	
+
+public:
+	ABaseWeapon();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class USceneComponent* SceneComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class USkeletalMeshComponent* SkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UWidgetComponent* WidgetComponent;
 };

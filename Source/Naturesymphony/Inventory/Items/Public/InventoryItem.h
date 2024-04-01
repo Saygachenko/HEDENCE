@@ -4,14 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Naturesymphony/Inventory/Public/InteractInterface.h"
 #include "InventoryItem.generated.h"
 
 UCLASS()
-class NATURESYMPHONY_API AInventoryItem : public AActor
+class NATURESYMPHONY_API AInventoryItem : public AActor, public IInteractInterface
 {
 	GENERATED_BODY()
 	
 public:	
+	// Function overriding view on item of interface
+	UFUNCTION(BlueprintCallable)
+	virtual FText LookAt() override;
+
 	// Sets default values for this actor's properties
 	AInventoryItem();
 
@@ -19,8 +24,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UItemDataComponent* ItemDataComponent;
 };

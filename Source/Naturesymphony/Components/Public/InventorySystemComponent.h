@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ItemDataComponent.h"
+#include "Naturesymphony/Components/Public/ItemDataComponent.h"
 #include "InventorySystemComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdateSignature);
@@ -143,7 +143,7 @@ private:
 
 	// Function for GetHFGameInstance
 	UFUNCTION(BlueprintCallable)
-	class UHFGameInstance* GetHFGameInstance();
+	class UHFGameInstance* GetHFGameInstance() const;
 
 	// Function for button Split item of inventory
 	UFUNCTION(BlueprintCallable)

@@ -3,12 +3,15 @@
 
 #include "Naturesymphony/Inventory/Items/Public/InventoryItem.h"
 
+#include "Naturesymphony/Components/Public/ItemDataComponent.h"
+
 // Sets default values
 AInventoryItem::AInventoryItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
 }
 
 // Called when the game starts or when spawned
@@ -18,10 +21,24 @@ void AInventoryItem::BeginPlay()
 	
 }
 
-// Called every frame
-void AInventoryItem::Tick(float DeltaTime)
+FText AInventoryItem::LookAt()
 {
-	Super::Tick(DeltaTime);
+	if (ItemDataComponent)
+	{
+		FName RowName = ItemDataComponent->ItemDataTableRow.RowName;
 
+		TObjectPtr<const UDataTable> DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
+		if (DataTable)
+		{
+			FItemData* ItemStruct = DataTable->FindRow<FItemData>(RowName, "No appropriate row name!");
+			if (ItemStruct)
+			{
+				FText Message = FText::FromString("E Pick up");
+
+				return Message;
+			}
+		}
+	}
+
+	return FText::GetEmpty();
 }
-

@@ -16,6 +16,5 @@ class NATURESYMPHONY_API USaveDataPlayer : public USaveGame
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Invetory Data")
 	TArray<FSlotStruct> SaveSlotStructArray;
 };
