@@ -86,6 +86,9 @@ private:
 	UPROPERTY()
 	UItemDataComponent* ItemDataComponent = nullptr;
 
+	UPROPERTY(EditDefaultsOnly)
+	UDataTable* ItemDataTable = nullptr;
+
 	UPROPERTY()
 	class UPickUpMessageWidget* PickUpMessageWidget = nullptr;
 

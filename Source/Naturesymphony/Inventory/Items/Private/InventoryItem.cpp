@@ -4,6 +4,8 @@
 #include "Naturesymphony/Inventory/Items/Public/InventoryItem.h"
 
 #include "Naturesymphony/Components/Public/ItemDataComponent.h"
+#include "Naturesymphony/Levels/Public/MainGameModeBase.h"
+#include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
 
 // Sets default values
 AInventoryItem::AInventoryItem()
@@ -19,6 +21,26 @@ void AInventoryItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+// Called when the actor destroyed of level
+void AInventoryItem::Destroyed()
+{
+	Super::Destroyed();
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		AMainGameModeBase* GameModeBase = Cast<AMainGameModeBase>(World->GetAuthGameMode());
+		if (GameModeBase)
+		{
+			USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelClass.GetDefaultObject();
+			if (SaveDataLevel)
+			{
+				SaveDataLevel->SaveActorsRemoved.AddUnique(this);
+			}
+		}
+	}
 }
 
 FText AInventoryItem::LookAt()

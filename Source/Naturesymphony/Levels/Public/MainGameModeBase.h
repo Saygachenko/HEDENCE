@@ -16,12 +16,15 @@ class NATURESYMPHONY_API AMainGameModeBase : public AGameModeBase
 	
 public:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
 	TSubclassOf<class USaveDataLevel> SaveDataLevelClass;
 
 private:
 	UPROPERTY()
 	class USaveGame* LoadGameDataLevel;
+
+	// Set name of level in the BeginPlay() function
+	FString GameDataLevel = "";
 };

@@ -15,5 +15,5 @@ class NATURESYMPHONY_API USaveDataLevel : public USaveGame
 	GENERATED_BODY()
 	
 public:
-	TArray<AActor> SaveActorsRemoved;
+	TArray<TSoftObjectPtr<AActor>> SaveActorsRemoved;
 };

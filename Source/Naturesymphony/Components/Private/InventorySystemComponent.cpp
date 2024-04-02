@@ -373,16 +373,12 @@ void UInventorySystemComponent::Interact()
 // Function get item data row
 FItemData UInventorySystemComponent::GetItemData(FName ItemID)
 {
-	if (ItemDataComponent)
+	if (ItemDataTable)
 	{
-		const UDataTable* DataTable = ItemDataComponent->ItemDataTableRow.DataTable;
-		if (DataTable)
+		const FItemData* ItemData = ItemDataTable->FindRow<FItemData>(ItemID, "");
+		if (ItemData)
 		{
-			const FItemData* ItemData = DataTable->FindRow<FItemData>(ItemID, "");
-			if (ItemData)
-			{
-				return *ItemData;
-			}
+			return *ItemData;
 		}
 	}
 

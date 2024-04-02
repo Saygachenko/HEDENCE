@@ -13,32 +13,53 @@ void AMainGameModeBase::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		FString CurrentLevelName = World->GetName();
-		FString GameDataLevel = CurrentLevelName.Append("Data");
+		USaveDataLevel* SaveDataLevelObject = SaveDataLevelClass.GetDefaultObject();
+		if (SaveDataLevelObject)
+		{
+			FString CurrentLevelName = World->GetName();
+			GameDataLevel = CurrentLevelName.Append("_GameData");
 
-		bool DoesSaveGame = UGameplayStatics::DoesSaveGameExist(GameDataLevel, 0);
-		if (DoesSaveGame)
-		{
-			LoadGameDataLevel = UGameplayStatics::LoadGameFromSlot(GameDataLevel, 0);
-			if (LoadGameDataLevel)
+			bool DoesSaveGame = UGameplayStatics::DoesSaveGameExist(GameDataLevel, 0);
+			if (DoesSaveGame)
 			{
-				USaveDataLevel* SaveDataPlayer = Cast<USaveDataLevel>(LoadGameDataLevel);
-				if (SaveDataPlayer)
-				{
-					UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
-				}
-			}
-		}
-		else
-		{
-			if (SaveDataLevelClass)
-			{
-				LoadGameDataLevel = UGameplayStatics::CreateSaveGameObject(SaveDataLevelClass);
+				LoadGameDataLevel = UGameplayStatics::LoadGameFromSlot(GameDataLevel, 0);
 				if (LoadGameDataLevel)
 				{
-					UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
+					USaveDataLevel* SaveDataLevel = Cast<USaveDataLevel>(LoadGameDataLevel);
+					if (SaveDataLevel)
+					{
+						UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
+
+						TArray<TSoftObjectPtr<AActor>>& ActorsRemovedArray = SaveDataLevelObject->SaveActorsRemoved;
+						for (const TSoftObjectPtr<AActor>& Actor : ActorsRemovedArray)
+						{
+							if (Actor)
+							{
+								Actor->Destroy();
+							}
+
+						}
+					}
+				}
+			}
+			else
+			{
+				if (SaveDataLevelClass)
+				{
+					LoadGameDataLevel = UGameplayStatics::CreateSaveGameObject(SaveDataLevelClass);
+					if (LoadGameDataLevel)
+					{
+						UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
+					}
 				}
 			}
 		}
 	}
+}
+
+void AMainGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
 }
