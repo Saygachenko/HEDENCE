@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "MainGameModeBase.generated.h"
 
+class USaveDataLevel;
+
 /**
  * 
  */
@@ -19,11 +21,14 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
-	TSubclassOf<class USaveDataLevel> SaveDataLevelClass;
+	TSubclassOf<USaveDataLevel> SaveDataLevelClass;
+
+	UPROPERTY()
+	USaveDataLevel* SaveDataLevelObject;
 
 private:
 	UPROPERTY()
-	class USaveGame* LoadGameDataLevel;
+	class USaveGame* LoadGameDataLevel = nullptr;
 
 	// Set name of level in the BeginPlay() function
 	FString GameDataLevel = "";

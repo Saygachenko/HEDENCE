@@ -13,7 +13,7 @@ void AMainGameModeBase::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		USaveDataLevel* SaveDataLevelObject = SaveDataLevelClass.GetDefaultObject();
+		SaveDataLevelObject = SaveDataLevelClass.GetDefaultObject();
 		if (SaveDataLevelObject)
 		{
 			FString CurrentLevelName = World->GetName();
@@ -25,33 +25,34 @@ void AMainGameModeBase::BeginPlay()
 				LoadGameDataLevel = UGameplayStatics::LoadGameFromSlot(GameDataLevel, 0);
 				if (LoadGameDataLevel)
 				{
-					USaveDataLevel* SaveDataLevel = Cast<USaveDataLevel>(LoadGameDataLevel);
-					if (SaveDataLevel)
+					TMultiMap<TSoftClassPtr<AActor>, FTransform>& ActorsAddedMap = SaveDataLevelObject->SaveAddedActors;
+					for (const TPair<TSoftClassPtr<AActor>, FTransform>& Pair : ActorsAddedMap)
 					{
-						UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
-
-						TArray<TSoftObjectPtr<AActor>>& ActorsRemovedArray = SaveDataLevelObject->SaveActorsRemoved;
-						for (const TSoftObjectPtr<AActor>& Actor : ActorsRemovedArray)
+						TSoftClassPtr<AActor> ActorPtr = Pair.Key;
+						FTransform ActorValue = Pair.Value;
+						
+						UClass* ActorClass = ActorPtr.Get();
+						if (ActorClass)
 						{
-							if (Actor)
-							{
-								Actor->Destroy();
-							}
-
+							World->SpawnActor<AActor>(ActorClass, ActorValue);
 						}
 					}
+
+					TArray<TSoftObjectPtr<AActor>>& ActorsRemovedArray = SaveDataLevelObject->SaveActorsRemoved;
+					for (const TSoftObjectPtr<AActor>& Actor : ActorsRemovedArray)
+					{
+						if (Actor)
+						{
+							Actor->Destroy();
+						}
+					}
+
+					UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
 				}
 			}
 			else
 			{
-				if (SaveDataLevelClass)
-				{
-					LoadGameDataLevel = UGameplayStatics::CreateSaveGameObject(SaveDataLevelClass);
-					if (LoadGameDataLevel)
-					{
-						UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
-					}
-				}
+				LoadGameDataLevel = UGameplayStatics::CreateSaveGameObject(SaveDataLevelClass);
 			}
 		}
 	}

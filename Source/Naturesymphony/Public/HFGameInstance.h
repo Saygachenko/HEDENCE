@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "HFGameInstance.generated.h"
 
-
+class USaveDataPlayer;
 
 UCLASS()
 class NATURESYMPHONY_API UHFGameInstance : public UGameInstance
@@ -18,10 +18,13 @@ public:
 	FString GameDataPlayerSlot = "GameDataPlayer";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveGame")
-	TSubclassOf<class USaveDataPlayer> SaveDataPlayerClass;
+	TSubclassOf<USaveDataPlayer> SaveDataPlayerClass;
 
 	// Virtual function to allow custom GameInstances an opportunity to set up what it needs
 	virtual void Init() override;
+
+	UPROPERTY()
+	USaveDataPlayer* SaveDataPlayerObject;
 
 private:
 	UPROPERTY()

@@ -14,6 +14,9 @@
 #include "HFGameInstance.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataPlayer.h"
 #include "Kismet/GameplayStatics.h"
+#include "Naturesymphony/Levels/Public/MainGameModeBase.h"
+#include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
+#include "GameFramework/SaveGame.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -245,27 +248,50 @@ void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystem
 // Function spawn item in world
 void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 {
-	TSubclassOf<AActor> ItemActorClass = GetItemData(ItemID).ItemClass;
-	if (ItemActorClass)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		FVector OwnerLocation = GetOwner()->GetActorLocation();
-		FVector OwnerForwardLocation = GetOwner()->GetActorForwardVector() * DropLineTraceLength;
-		FVector StartLocation = OwnerLocation + OwnerForwardLocation;
-
-		if (Quantity > 0)
+		AMainGameModeBase* GameModeBase = Cast<AMainGameModeBase>(World->GetAuthGameMode());
+		if (GameModeBase)
 		{
-			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ItemActorClass, StartLocation, FRotator::ZeroRotator);
-			if (SpawnedActor)
+			AActor* InventoryOwner = GetOwner();
+			if (InventoryOwner)
 			{
-				UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
-				if (MeshComponent)
+				if (Quantity > 0)
 				{
-					MeshComponent->AddImpulse(OwnerForwardLocation * ImpulseVelocity, NAME_None, false);
-
-					ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
-					if (ItemDataComponent)
+					AActor* ItemActorObject = GetItemData(ItemID).ItemClass.GetDefaultObject();
+					if (ItemActorObject)
 					{
-						ItemDataComponent->SetPickUpStackSize(Quantity);
+						UClass* ItemActorClass = ItemActorObject->GetClass();
+						if (ItemActorClass)
+						{
+							FVector OwnerLocation = InventoryOwner->GetActorLocation();
+							FVector OwnerForwardLocation = InventoryOwner->GetActorForwardVector() * DropLineTraceLength;
+							FVector StartLocation = OwnerLocation + OwnerForwardLocation;
+
+							AActor* SpawnedActor = World->SpawnActor<AActor>(ItemActorClass, StartLocation, FRotator::ZeroRotator);
+							if (SpawnedActor)
+							{
+								ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
+								if (ItemDataComponent)
+								{
+									ItemDataComponent->SetPickUpStackSize(Quantity);
+
+									USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelObject;
+									if (SaveDataLevel)
+									{
+										FTransform SpawnedActorTransform = SpawnedActor->GetActorTransform();
+										SaveDataLevel->SaveAddedActors.Add(ItemActorClass, SpawnedActorTransform);
+
+										/*UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
+										if (MeshComponent)
+										{
+											MeshComponent->AddImpulse(OwnerForwardLocation * ImpulseVelocity, NAME_None, false);
+										}*/
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -410,9 +436,9 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 // Function for SaveInventory
 void UInventorySystemComponent::SaveInventory()
 {
-	FString GameDataSlot = GetHFGameInstance()->GameDataPlayerSlot;
+	FString GameDataSlot = GetGameInstance()->GameDataPlayerSlot;
 
-	USaveDataPlayer* SaveDataPlayer = GetHFGameInstance()->SaveDataPlayerClass.GetDefaultObject();
+	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
 	if (SaveDataPlayer)
 	{
 		SaveDataPlayer->SaveSlotStructArray = SlotStructArray;
@@ -423,7 +449,7 @@ void UInventorySystemComponent::SaveInventory()
 // Function for LoadInventory
 void UInventorySystemComponent::LoadInventory()
 {
-	USaveDataPlayer* SaveDataPlayer = GetHFGameInstance()->SaveDataPlayerClass.GetDefaultObject();
+	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
 	if (SaveDataPlayer)
 	{
 		SlotStructArray = SaveDataPlayer->SaveSlotStructArray;
@@ -431,7 +457,7 @@ void UInventorySystemComponent::LoadInventory()
 }
 
 // Function for GetHFGameInstance
-UHFGameInstance* UInventorySystemComponent::GetHFGameInstance() const
+UHFGameInstance* UInventorySystemComponent::GetGameInstance() const
 {
 	UWorld* World = GetWorld();
 	if (World)

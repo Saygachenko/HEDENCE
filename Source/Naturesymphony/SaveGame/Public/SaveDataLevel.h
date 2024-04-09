@@ -16,4 +16,6 @@ class NATURESYMPHONY_API USaveDataLevel : public USaveGame
 	
 public:
 	TArray<TSoftObjectPtr<AActor>> SaveActorsRemoved;
+
+	TMultiMap<TSoftClassPtr<AActor>, FTransform> SaveAddedActors;
 };

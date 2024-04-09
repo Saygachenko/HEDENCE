@@ -34,7 +34,7 @@ void AInventoryItem::Destroyed()
 		AMainGameModeBase* GameModeBase = Cast<AMainGameModeBase>(World->GetAuthGameMode());
 		if (GameModeBase)
 		{
-			USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelClass.GetDefaultObject();
+			USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelObject;
 			if (SaveDataLevel)
 			{
 				SaveDataLevel->SaveActorsRemoved.AddUnique(this);

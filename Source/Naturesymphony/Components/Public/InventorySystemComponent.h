@@ -146,7 +146,7 @@ private:
 
 	// Function for GetHFGameInstance
 	UFUNCTION(BlueprintCallable)
-	class UHFGameInstance* GetHFGameInstance() const;
+	class UHFGameInstance* GetGameInstance() const;
 
 	// Function for button Split item of inventory
 	UFUNCTION(BlueprintCallable)

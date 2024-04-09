@@ -11,32 +11,17 @@ void UHFGameInstance::Init()
 {
 	Super::Init();
 
-	USaveDataPlayer* SaveDataPlayerObject = SaveDataPlayerClass.GetDefaultObject();
+	SaveDataPlayerObject = SaveDataPlayerClass.GetDefaultObject();
 	if (SaveDataPlayerObject)
 	{
 		bool DoesSaveGame = UGameplayStatics::DoesSaveGameExist(GameDataPlayerSlot, 0);
 		if (DoesSaveGame)
 		{
 			LoadGameDataPlayer = UGameplayStatics::LoadGameFromSlot(GameDataPlayerSlot, 0);
-			if (LoadGameDataPlayer)
-			{
-				USaveDataPlayer* SaveDataPlayer = Cast<USaveDataPlayer>(LoadGameDataPlayer);
-				if (SaveDataPlayer)
-				{
-					UGameplayStatics::SaveGameToSlot(LoadGameDataPlayer, GameDataPlayerSlot, 0);
-				}
-			}
 		}
 		else
 		{
-			if (SaveDataPlayerClass)
-			{
-				LoadGameDataPlayer = UGameplayStatics::CreateSaveGameObject(SaveDataPlayerClass);
-				if (LoadGameDataPlayer)
-				{
-					UGameplayStatics::SaveGameToSlot(LoadGameDataPlayer, GameDataPlayerSlot, 0);
-				}
-			}
+			LoadGameDataPlayer = UGameplayStatics::CreateSaveGameObject(SaveDataPlayerClass);
 		}
 	}
 }
