@@ -5,6 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
+#include "Naturesymphony/Components/Public/ItemDataComponent.h"
 
 void AMainGameModeBase::BeginPlay()
 {
@@ -25,16 +26,25 @@ void AMainGameModeBase::BeginPlay()
 				LoadGameDataLevel = UGameplayStatics::LoadGameFromSlot(GameDataLevel, 0);
 				if (LoadGameDataLevel)
 				{
-					TMultiMap<TSoftClassPtr<AActor>, FTransform>& ActorsAddedMap = SaveDataLevelObject->SaveAddedActors;
-					for (const TPair<TSoftClassPtr<AActor>, FTransform>& Pair : ActorsAddedMap)
+					TMultiMap<TSoftClassPtr<AActor>, FSaveItemData>& ActorsAddedMap = SaveDataLevelObject->SaveAddedActors;
+					for (const TPair<TSoftClassPtr<AActor>, FSaveItemData>& Pair : ActorsAddedMap)
 					{
 						TSoftClassPtr<AActor> ActorPtr = Pair.Key;
-						FTransform ActorValue = Pair.Value;
+						FTransform ActorValueTransform = Pair.Value.Transform;
+						int32 ActorValueStackSize = Pair.Value.PickUpStackSize;
 						
 						UClass* ActorClass = ActorPtr.Get();
 						if (ActorClass)
 						{
-							World->SpawnActor<AActor>(ActorClass, ActorValue);
+							AActor* SpawnedActor = World->SpawnActor<AActor>(ActorClass, ActorValueTransform);
+							if (SpawnedActor)
+							{
+								UItemDataComponent* ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
+								if (ItemDataComponent)
+								{
+									ItemDataComponent->PickUpQuantity = ActorValueStackSize;
+								}
+							}
 						}
 					}
 

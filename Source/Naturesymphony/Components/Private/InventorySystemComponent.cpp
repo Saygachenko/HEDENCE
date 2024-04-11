@@ -275,13 +275,16 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 								ItemDataComponent = SpawnedActor->FindComponentByClass<UItemDataComponent>();
 								if (ItemDataComponent)
 								{
-									ItemDataComponent->SetPickUpStackSize(Quantity);
+									ItemDataComponent->PickUpQuantity = Quantity;
 
 									USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelObject;
 									if (SaveDataLevel)
 									{
-										FTransform SpawnedActorTransform = SpawnedActor->GetActorTransform();
-										SaveDataLevel->SaveAddedActors.Add(ItemActorClass, SpawnedActorTransform);
+										FSaveItemData SaveItemDataStruct;
+										SaveItemDataStruct.Transform = SpawnedActor->GetActorTransform();
+										SaveItemDataStruct.PickUpStackSize = ItemDataComponent->PickUpQuantity;
+
+										SaveDataLevel->SaveAddedActors.Add(ItemActorClass, SaveItemDataStruct);
 
 										/*UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
 										if (MeshComponent)
