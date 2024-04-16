@@ -16,15 +16,16 @@ class NATURESYMPHONY_API AMainCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
+public:	
+	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
+	class AEquipWeaponEffect* CurrentWeapon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
+	FName ToHipWeaponAttachSocketName = "HipSocket";
+
 	// Sets default values for this character's properties
 	AMainCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -71,6 +72,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* InteractInputAction;
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 	// Function falling on ground from height and take damage
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& Hit);
@@ -90,6 +94,21 @@ protected:
 	// Max value damage for from fall
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
 	float MaxDamageLanded = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* EquipToHandAnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* EquipOnHipAnimMontage;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsEquipedToHand = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAnimFinished = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
+	FName ToHandWeaponAttachSocketName = "HandSocket";
 
 	// Function delegate death Character
 	UFUNCTION()
@@ -121,4 +140,10 @@ private:
 
 	// Function checked overlap camer and capsule of character
 	void CheckCameraOverlap();
+
+	// Function anim equip weapon to hand
+	void AnimEquipWeaponToHand();
+
+	// Function anim equip weapon to hip
+	void AnimEquipWeaponOnHip();
 };

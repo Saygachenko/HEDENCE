@@ -17,6 +17,8 @@
 #include "Naturesymphony/Levels/Public/MainGameModeBase.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
 #include "GameFramework/SaveGame.h"
+#include "Naturesymphony/Characters/Public/MainCharacter.h"
+#include "Naturesymphony/Inventory/Items/Effects/Public/EquipWeaponEffect.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -420,16 +422,27 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 	FSlotStruct ConsumeItemIndex = SlotStructArray[IndexSlot];
 	FName ConsumeID = ConsumeItemIndex.ID;
 
-	TSubclassOf<AItemEffect> ItemEffectData = GetItemData(ConsumeID).ItemEffect;
-	if (ItemEffectData)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		FVector OwnerLocation = GetOwner()->GetActorLocation();
-
-		AItemEffect* ItemEffect = GetWorld()->SpawnActor<AItemEffect>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
-
-		if (ItemEffect)
+		AActor* Owner = GetOwner();
+		if (Owner)
 		{
-			RemoveFromInventory(IndexSlot, false, true);
+			TSubclassOf<AItemEffect> ItemEffectData = GetItemData(ConsumeID).ItemEffect;
+			if (ItemEffectData)
+			{
+				FVector OwnerLocation = Owner->GetActorLocation();
+				/*auto MainCharacter = Cast<AMainCharacter>(Owner);
+				auto& Equip = MainCharacter->EquipWeapon;*/
+
+				AEquipWeaponEffect* ItemEffect = World->SpawnActor<AEquipWeaponEffect>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
+
+				if (ItemEffect)
+				{
+					/*Equip = Cast<AEquipWeaponEffect>(ItemEffect);*/
+					RemoveFromInventory(IndexSlot, false, true);
+				}
+			}
 		}
 	}
 

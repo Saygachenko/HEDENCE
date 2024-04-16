@@ -60,6 +60,8 @@ void AMainCharacter::BeginPlay()
 		}
 	}
 
+	//EquipWeapon = EquipWeaponClass.GetDefaultObject();
+
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
 	CameraCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionBeginOverlap);
@@ -88,7 +90,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
-		//Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquippingWeapon);
+		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::AnimEquipWeaponToHand);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 	}
 }
@@ -191,4 +193,27 @@ void AMainCharacter::CheckCameraOverlap()
 {
 	const bool HideMesh = CameraCollisionComponent->IsOverlappingComponent(GetCapsuleComponent());
 	GetMesh()->SetOwnerNoSee(HideMesh);
+}
+
+void AMainCharacter::AnimEquipWeaponToHand()
+{
+	if (bIsAnimFinished && CurrentWeapon)
+	{
+		bIsAnimFinished = false;
+		if (!bIsEquipedToHand)
+		{
+			this->PlayAnimMontage(EquipToHandAnimMontage);
+			bIsEquipedToHand = true;
+		}
+		else
+		{
+			AnimEquipWeaponOnHip();
+		}
+	}
+}
+
+void AMainCharacter::AnimEquipWeaponOnHip()
+{
+	this->PlayAnimMontage(EquipOnHipAnimMontage);
+	bIsEquipedToHand = false;
 }
