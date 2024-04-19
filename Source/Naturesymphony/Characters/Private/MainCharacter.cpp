@@ -15,6 +15,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
 #include "Naturesymphony/Components/Public/InventorySystemComponent.h"
+#include "Naturesymphony/Inventory/Items/Effects/Public/EquipWeaponEffect.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -200,10 +201,10 @@ void AMainCharacter::AnimEquipWeaponToHand()
 	if (bIsAnimFinished && CurrentWeapon)
 	{
 		bIsAnimFinished = false;
-		if (!bIsEquipedToHand)
+		if (!CurrentWeapon->IsAttachedToHand())
 		{
 			this->PlayAnimMontage(EquipToHandAnimMontage);
-			bIsEquipedToHand = true;
+			CurrentWeapon->SetAttachedToHand(true);
 		}
 		else
 		{
@@ -215,5 +216,5 @@ void AMainCharacter::AnimEquipWeaponToHand()
 void AMainCharacter::AnimEquipWeaponOnHip()
 {
 	this->PlayAnimMontage(EquipOnHipAnimMontage);
-	bIsEquipedToHand = false;
+	CurrentWeapon->SetAttachedToHand(false);
 }

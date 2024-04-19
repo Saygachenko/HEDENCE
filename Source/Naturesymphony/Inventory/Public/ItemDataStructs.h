@@ -7,6 +7,14 @@
 #include "GameFramework/Actor.h"
 #include "ItemDataStructs.generated.h"
 
+UENUM(BlueprintType)
+enum class ECombatType : uint8
+{
+	None,
+	LightWeapon,
+	GreatWeapon
+};
+
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
@@ -32,4 +40,7 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	TSubclassOf<class AItemEffect> ItemEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
+	ECombatType CombatType = ECombatType::None;
 };

@@ -428,18 +428,14 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 		AActor* Owner = GetOwner();
 		if (Owner)
 		{
-			TSubclassOf<AItemEffect> ItemEffectData = GetItemData(ConsumeID).ItemEffect;
+			AItemEffect* ItemEffectData = GetItemData(ConsumeID).ItemEffect.GetDefaultObject();
 			if (ItemEffectData)
 			{
 				FVector OwnerLocation = Owner->GetActorLocation();
-				/*auto MainCharacter = Cast<AMainCharacter>(Owner);
-				auto& Equip = MainCharacter->EquipWeapon;*/
 
-				AEquipWeaponEffect* ItemEffect = World->SpawnActor<AEquipWeaponEffect>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
-
-				if (ItemEffect)
+				AItemEffect* SpawnItemEffect = World->SpawnActor<AItemEffect>(ItemEffectData->GetClass(), OwnerLocation, FRotator::ZeroRotator);
+				if (SpawnItemEffect)
 				{
-					/*Equip = Cast<AEquipWeaponEffect>(ItemEffect);*/
 					RemoveFromInventory(IndexSlot, false, true);
 				}
 			}

@@ -21,7 +21,7 @@ public:
 	class AEquipWeaponEffect* CurrentWeapon = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
-	FName ToHipWeaponAttachSocketName = "HipSocket";
+	FName FirstAttachSocketName = "";
 
 	// Sets default values for this character's properties
 	AMainCharacter();
@@ -108,7 +108,7 @@ protected:
 	bool bIsAnimFinished = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
-	FName ToHandWeaponAttachSocketName = "HandSocket";
+	FName HandAttachSocketName = "";
 
 	// Function delegate death Character
 	UFUNCTION()

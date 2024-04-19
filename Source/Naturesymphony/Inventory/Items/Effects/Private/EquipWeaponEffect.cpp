@@ -3,9 +3,11 @@
 
 #include "Naturesymphony/Inventory/Items/Effects/Public/EquipWeaponEffect.h"
 
-#include "GameFramework/Character.h"
+//#include "GameFramework/Character.h"
 #include "Naturesymphony/Characters/Public/MainCharacter.h"
 #include "Kismet/GameplayStatics.h"
+//#include "Naturesymphony/Inventory/Public/AnimInstanceInterface.h"
+#include "MainPlayerAnimInstance.h"
 
 AEquipWeaponEffect::AEquipWeaponEffect()
 {
@@ -33,10 +35,35 @@ void AEquipWeaponEffect::EquipWeaponToHip()
 				USkeletalMeshComponent* MainCharacterMesh = MainCharacter->GetMesh();
 				if (MainCharacterMesh)
 				{
-					MainCharacter->CurrentWeapon = this;
-					this->AttachToComponent(MainCharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MainCharacter->ToHipWeaponAttachSocketName);
+					UAnimInstance* AnimInstance = MainCharacterMesh->GetAnimInstance();
+					if (AnimInstance)
+					{
+						MainPlayerAnimInstance = Cast<UMainPlayerAnimInstance>(AnimInstance);
+						if (MainPlayerAnimInstance)
+						{
+							if (DataTable)
+							{
+								const FItemData* ItemData = DataTable->FindRow<FItemData>(FName("item_0001"), "");
+								if (ItemData)
+								{
+									MainCharacter->CurrentWeapon = this;
+									this->AttachToComponent(MainCharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MainCharacter->FirstAttachSocketName);
+									MainPlayerAnimInstance->Execute_UpdateCombatType(MainPlayerAnimInstance, ItemData->CombatType);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
+	}
+}
+
+void AEquipWeaponEffect::SetAttachedToHand(bool IsAttachedToHand)
+{
+	if (MainPlayerAnimInstance)
+	{
+		IsAttachedToHands = IsAttachedToHand;
+		MainPlayerAnimInstance->Execute_UpdateWeaponAttachedToHand(MainPlayerAnimInstance, IsAttachedToHands);
 	}
 }

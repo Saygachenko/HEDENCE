@@ -17,14 +17,26 @@ class NATURESYMPHONY_API AEquipWeaponEffect : public AItemEffect
 public:
 	AEquipWeaponEffect();
 
+	void SetAttachedToHand(bool IsAttachedToHand);
+
+	UFUNCTION(BlueprintPure)
+	bool IsAttachedToHand() { return IsAttachedToHands; };
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 
+	UPROPERTY(EditDefaultsOnly)
+	UDataTable* DataTable = nullptr;
+
 private:
+	bool IsAttachedToHands = false;
+
+	UPROPERTY()
+	class UMainPlayerAnimInstance* MainPlayerAnimInstance = nullptr;
+
 	// Function spawn weapons
-	UFUNCTION()
 	void EquipWeaponToHip();
 };
