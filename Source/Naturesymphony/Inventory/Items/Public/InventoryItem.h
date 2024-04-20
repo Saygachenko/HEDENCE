@@ -28,5 +28,14 @@ protected:
 	virtual void Destroyed() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UItemDataComponent* ItemDataComponent;
+	class UItemDataComponent* ItemDataComponent = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	USceneComponent* SceneComponent = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UWidgetComponent* WidgetComponent = nullptr;
 };

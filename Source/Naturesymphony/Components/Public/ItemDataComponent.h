@@ -29,9 +29,6 @@ public:
 	// Function of overriding interaction with interface item
 	virtual void InteractWith(ACharacter* PlayerCharacter) override;
 
-	/*void SetPickUpStackSize(int32 NewPickUpStackSize) { PickUpQuantity = NewPickUpStackSize; };
-	int32 GetPickUpStackSize() { return PickUpQuantity; };*/
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

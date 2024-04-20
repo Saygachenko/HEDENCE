@@ -6,12 +6,22 @@
 #include "Naturesymphony/Components/Public/ItemDataComponent.h"
 #include "Naturesymphony/Levels/Public/MainGameModeBase.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AInventoryItem::AInventoryItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(FName("SceneComponent"));
+	RootComponent = SceneComponent;
+
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMeshComponent"));
+	SkeletalMeshComponent->SetupAttachment(GetRootComponent());
+
+	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("WidgetComponent"));
+	WidgetComponent->SetupAttachment(SkeletalMeshComponent);
 
 	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
 }

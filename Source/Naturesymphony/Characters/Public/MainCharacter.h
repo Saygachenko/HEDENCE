@@ -18,7 +18,7 @@ class NATURESYMPHONY_API AMainCharacter : public ACharacter
 
 public:	
 	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
-	class AEquipWeaponEffect* CurrentWeapon = nullptr;
+	class AEquipEffect* CurrentWeapon = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
 	FName FirstAttachSocketName = "";

@@ -18,7 +18,8 @@
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
 #include "GameFramework/SaveGame.h"
 #include "Naturesymphony/Characters/Public/MainCharacter.h"
-#include "Naturesymphony/Inventory/Items/Effects/Public/EquipWeaponEffect.h"
+#include "Naturesymphony/Inventory/Items/Effects/Public/EquipEffect.h"
+#include "Naturesymphony/Characters/Public/MainPlayerAnimInstance.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -436,6 +437,33 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 				AItemEffect* SpawnItemEffect = World->SpawnActor<AItemEffect>(ItemEffectData->GetClass(), OwnerLocation, FRotator::ZeroRotator);
 				if (SpawnItemEffect)
 				{
+					AEquipEffect* EquipEffect = Cast<AEquipEffect>(SpawnItemEffect);
+					if (EquipEffect)
+					{
+						ACharacter* Character = Cast<ACharacter>(Owner);
+						if (Character)
+						{
+							USkeletalMeshComponent* CharacterMesh = Character->GetMesh();
+							if (CharacterMesh)
+							{
+								UAnimInstance* AnimInstance = CharacterMesh->GetAnimInstance();
+								if (AnimInstance)
+								{
+									UMainPlayerAnimInstance* MainPlayerAnimInstance = Cast<UMainPlayerAnimInstance>(AnimInstance);
+									if (MainPlayerAnimInstance)
+									{
+										bool IsInterface = MainPlayerAnimInstance->GetClass()->ImplementsInterface(UAnimInstanceInterface::StaticClass());
+										if (IsInterface)
+										{
+											ECombatType CombatType = GetItemData(ConsumeID).CombatType;
+											MainPlayerAnimInstance->Execute_UpdateCombatType(MainPlayerAnimInstance, CombatType);
+										}
+									}
+								}
+							}
+						}
+					}
+
 					RemoveFromInventory(IndexSlot, false, true);
 				}
 			}
