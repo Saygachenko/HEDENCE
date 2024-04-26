@@ -15,7 +15,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
 #include "Naturesymphony/Components/Public/InventorySystemComponent.h"
-#include "Naturesymphony/Inventory/Items/Effects/Public/EquipEffect.h"
+#include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
+#include "Naturesymphony/Components/Public/CombatComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -43,6 +44,8 @@ AMainCharacter::AMainCharacter()
 
 	CameraCollisionComponent->SetSphereRadius(10.0f);
 	CameraCollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(FName("CombatComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -60,8 +63,6 @@ void AMainCharacter::BeginPlay()
 			}
 		}
 	}
-
-	//EquipWeapon = EquipWeaponClass.GetDefaultObject();
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
@@ -91,8 +92,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
-		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::AnimEquipWeaponToHand);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
+		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::OnEquipedItem);
 	}
 }
 
@@ -196,25 +197,21 @@ void AMainCharacter::CheckCameraOverlap()
 	GetMesh()->SetOwnerNoSee(HideMesh);
 }
 
-void AMainCharacter::AnimEquipWeaponToHand()
+// Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
+void AMainCharacter::OnEquipedItem()
 {
-	if (bIsAnimFinished && CurrentWeapon)
+	if (CombatComponent)
 	{
-		bIsAnimFinished = false;
-		if (!CurrentWeapon->GetAttachedToHand())
+		if (CombatComponent->GetMainWeapon())
 		{
-			this->PlayAnimMontage(EquipToHandAnimMontage);
-			CurrentWeapon->SetAttachedToHand(true);
-		}
-		else
-		{
-			AnimEquipWeaponOnHip();
+			if (!CombatComponent->GetCombatEnabled())
+			{
+				PlayAnimMontage(CombatComponent->GetMainWeapon()->EnterCombat);
+			}
+			else
+			{
+				PlayAnimMontage(CombatComponent->GetMainWeapon()->ExitCombat);
+			}
 		}
 	}
-}
-
-void AMainCharacter::AnimEquipWeaponOnHip()
-{
-	this->PlayAnimMontage(EquipOnHipAnimMontage);
-	CurrentWeapon->SetAttachedToHand(false);
 }

@@ -15,10 +15,16 @@ class NATURESYMPHONY_API ABaseWeapon : public AEquipEffect
 	GENERATED_BODY()
 
 public:
-	ABaseWeapon();
-	
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* EnterCombat = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* ExitCombat = nullptr;
+
+	// Function override for equipping weapons on a the character.
+	virtual void OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType) override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName HandSocketName = FName();
 };

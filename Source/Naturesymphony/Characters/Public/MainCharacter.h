@@ -17,12 +17,6 @@ class NATURESYMPHONY_API AMainCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
-	class AEquipEffect* CurrentWeapon = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
-	FName FirstAttachSocketName = "";
-
 	// Sets default values for this character's properties
 	AMainCharacter();
 
@@ -47,6 +41,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class USphereComponent* CameraCollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UCombatComponent* CombatComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputMappingContext* InputMapping;
@@ -95,21 +92,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
 	float MaxDamageLanded = 100.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
-	UAnimMontage* EquipToHandAnimMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
-	UAnimMontage* EquipOnHipAnimMontage;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool bIsEquipedToHand = false;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool bIsAnimFinished = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
-	FName HandAttachSocketName = "";
-
 	// Function delegate death Character
 	UFUNCTION()
 	void OnDeath();
@@ -141,9 +123,6 @@ private:
 	// Function checked overlap camer and capsule of character
 	void CheckCameraOverlap();
 
-	// Function anim equip weapon to hand
-	void AnimEquipWeaponToHand();
-
-	// Function anim equip weapon to hip
-	void AnimEquipWeaponOnHip();
+	// Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
+	void OnEquipedItem();
 };

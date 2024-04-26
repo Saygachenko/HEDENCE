@@ -3,57 +3,65 @@
 
 #include "Naturesymphony/Inventory/Items/Effects/Public/EquipEffect.h"
 
-#include "Naturesymphony/Characters/Public/MainCharacter.h"
-#include "Kismet/GameplayStatics.h"
-#include "Naturesymphony/Characters/Public/MainPlayerAnimInstance.h"
+#include "GameFramework/Character.h"
 
 AEquipEffect::AEquipEffect()
 {
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(FName("SceneComponent"));
+	RootComponent = SceneComponent;
+
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMeshComponent"));
+	SkeletalMeshComponent->SetupAttachment(GetRootComponent());
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"));
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
 }
 
 void AEquipEffect::BeginPlay()
 {
-	FirstEquipItem();
+	Super::BeginPlay();
 }
 
-// Function first equip item on player
-void AEquipEffect::FirstEquipItem()
+// Getter StaticMesh or SkeletalMesh
+UPrimitiveComponent* AEquipEffect::GetItemMesh()
 {
-	UWorld* World = GetWorld();
-	if (World)
+	UStaticMesh* ItemStaticMesh = StaticMeshComponent->GetStaticMesh();
+	if (ItemStaticMesh)
 	{
-		ACharacter* Character = UGameplayStatics::GetPlayerCharacter(World, 0);
-		if (Character)
-		{
-			AMainCharacter* MainCharacter = Cast<AMainCharacter>(Character);
-			if (MainCharacter)
-			{
-				MainCharacterMesh = MainCharacter->GetMesh();
-				if (MainCharacterMesh)
-				{
-					MainCharacter->CurrentWeapon = this;
-					this->AttachToComponent(MainCharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), MainCharacter->FirstAttachSocketName);
-				}
-			}
-		}
+		return StaticMeshComponent;
+	}
+	else
+	{
+		return SkeletalMeshComponent;
 	}
 }
 
-// Setter for IsAttachedToHand
-void AEquipEffect::SetAttachedToHand(bool IsAttachedToHand)
+// Basic function of equipping item on a character
+void AEquipEffect::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
 {
-	UAnimInstance* AnimInstance = MainCharacterMesh->GetAnimInstance();
-	if (AnimInstance)
+	bIsEquipped = true;
+
+	AttachActor(CharacterOwner, AttachSocketName);
+}
+
+// Function checks IsEquipped item
+void AEquipEffect::OnUnequipped()
+{
+	if (bIsEquipped)
 	{
-		UMainPlayerAnimInstance* MainPlayerAnimInstance = Cast<UMainPlayerAnimInstance>(AnimInstance);
-		if(MainPlayerAnimInstance)
+		bIsEquipped = false;
+	}
+}
+
+// Function attach actor on a character
+void AEquipEffect::AttachActor(ACharacter* CharacterOwner, FName SocketName)
+{
+	if (CharacterOwner)
+	{
+		USkeletalMeshComponent* CharacterMeshComponent = CharacterOwner->GetMesh();
+		if (CharacterMeshComponent)
 		{
-			bool IsInterface = MainPlayerAnimInstance->GetClass()->ImplementsInterface(UAnimInstanceInterface::StaticClass());
-			if (IsInterface)
-			{
-				IsAttachedToHands = IsAttachedToHand;
-				MainPlayerAnimInstance->Execute_UpdateWeaponAttachedToHand(MainPlayerAnimInstance, IsAttachedToHands);
-			}
+			this->AttachToComponent(CharacterMeshComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), SocketName);
 		}
 	}
 }

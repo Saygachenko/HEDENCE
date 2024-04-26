@@ -39,7 +39,7 @@ struct FItemData : public FTableRowBase
 	int32 StackSize = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
-	TSubclassOf<class AItemEffect> ItemEffect;
+	TSubclassOf<class AItemEffect> ItemEffect = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Data")
 	ECombatType CombatType = ECombatType::None;

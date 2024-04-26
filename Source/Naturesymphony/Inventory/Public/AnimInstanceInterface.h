@@ -29,5 +29,5 @@ public:
 
 	// Function implemented in the blueprint class ABP
 	UFUNCTION(BlueprintNativeEvent)
-	void UpdateWeaponAttachedToHand(bool AttachedToHand);
+	void UpdateCombatEnabled(bool CombatEnabled);
 };

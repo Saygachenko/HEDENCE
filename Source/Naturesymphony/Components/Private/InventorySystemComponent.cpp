@@ -17,9 +17,8 @@
 #include "Naturesymphony/Levels/Public/MainGameModeBase.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
 #include "GameFramework/SaveGame.h"
-#include "Naturesymphony/Characters/Public/MainCharacter.h"
-#include "Naturesymphony/Inventory/Items/Effects/Public/EquipEffect.h"
 #include "Naturesymphony/Characters/Public/MainPlayerAnimInstance.h"
+#include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
 
 // Sets default values for this component's properties
 UInventorySystemComponent::UInventorySystemComponent()
@@ -429,42 +428,26 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 		AActor* Owner = GetOwner();
 		if (Owner)
 		{
-			AItemEffect* ItemEffectData = GetItemData(ConsumeID).ItemEffect.GetDefaultObject();
-			if (ItemEffectData)
+			ACharacter* CharacterOwner = Cast<ACharacter>(Owner);
+			if (CharacterOwner)
 			{
-				FVector OwnerLocation = Owner->GetActorLocation();
-
-				AItemEffect* SpawnItemEffect = World->SpawnActor<AItemEffect>(ItemEffectData->GetClass(), OwnerLocation, FRotator::ZeroRotator);
-				if (SpawnItemEffect)
+				TSubclassOf<AItemEffect> ItemEffectData = GetItemData(ConsumeID).ItemEffect;
+				if (ItemEffectData)
 				{
-					AEquipEffect* EquipEffect = Cast<AEquipEffect>(SpawnItemEffect);
-					if (EquipEffect)
-					{
-						ACharacter* Character = Cast<ACharacter>(Owner);
-						if (Character)
-						{
-							USkeletalMeshComponent* CharacterMesh = Character->GetMesh();
-							if (CharacterMesh)
-							{
-								UAnimInstance* AnimInstance = CharacterMesh->GetAnimInstance();
-								if (AnimInstance)
-								{
-									UMainPlayerAnimInstance* MainPlayerAnimInstance = Cast<UMainPlayerAnimInstance>(AnimInstance);
-									if (MainPlayerAnimInstance)
-									{
-										bool IsInterface = MainPlayerAnimInstance->GetClass()->ImplementsInterface(UAnimInstanceInterface::StaticClass());
-										if (IsInterface)
-										{
-											ECombatType CombatType = GetItemData(ConsumeID).CombatType;
-											MainPlayerAnimInstance->Execute_UpdateCombatType(MainPlayerAnimInstance, CombatType);
-										}
-									}
-								}
-							}
-						}
-					}
+					FVector OwnerLocation = CharacterOwner->GetActorLocation();
 
-					RemoveFromInventory(IndexSlot, false, true);
+					AItemEffect* SpawnedItemEffect = World->SpawnActor<ABaseWeapon>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
+					if (SpawnedItemEffect)
+					{
+						ABaseWeapon* BaseWeaponEffect = Cast<ABaseWeapon>(SpawnedItemEffect);
+						if (BaseWeaponEffect)
+						{
+							ECombatType CombatType = GetItemData(ConsumeID).CombatType;
+							BaseWeaponEffect->OnEquipped(CharacterOwner, CombatType);
+						}
+
+						RemoveFromInventory(IndexSlot, false, true);
+					}
 				}
 			}
 		}

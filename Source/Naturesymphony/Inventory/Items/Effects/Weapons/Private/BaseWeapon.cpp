@@ -3,8 +3,50 @@
 
 #include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
 
-ABaseWeapon::ABaseWeapon()
+#include "Naturesymphony/Characters/Public/MainPlayerAnimInstance.h"
+#include "Naturesymphony/Components/Public/CombatComponent.h"
+#include "GameFramework/Character.h"
+
+// Function for equipping weapons on a the character.
+void ABaseWeapon::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
 {
-	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMeshComponent"));
-	RootComponent = SkeletalMeshComponent;
+	Super::OnEquipped(CharacterOwner, CombatType);
+
+	if (CharacterOwner)
+	{
+		UCombatComponent* CombatComponent = CharacterOwner->GetComponentByClass<UCombatComponent>();
+		if (CombatComponent)
+		{
+			ACharacter* OwnerCharacter = Cast<ACharacter>(CharacterOwner);
+			if (OwnerCharacter)
+			{
+				SetIsEuqipped(true);
+
+				if (CombatComponent->GetCombatEnabled())
+				{
+					AttachActor(OwnerCharacter, HandSocketName);
+				}
+				else
+				{
+					AttachActor(OwnerCharacter, AttachSocketName);
+				}
+
+				CombatComponent->SetMainWeapon(this);
+
+				USkeletalMeshComponent* OwnerMeshComponent = OwnerCharacter->GetMesh();
+				if (OwnerMeshComponent)
+				{
+					UAnimInstance* OwnerAnimInstance = OwnerMeshComponent->GetAnimInstance();
+					if (OwnerAnimInstance)
+					{
+						UMainPlayerAnimInstance* OwnerMainPlayerAnimInstance = Cast<UMainPlayerAnimInstance>(OwnerAnimInstance);
+						if (OwnerMainPlayerAnimInstance)
+						{
+							OwnerMainPlayerAnimInstance->Execute_UpdateCombatType(OwnerMainPlayerAnimInstance, CombatType);
+						}
+					}
+				}
+			}
+		}
+	}
 }
