@@ -21,10 +21,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* ExitCombat = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
+	TArray<UAnimMontage*> AttackMontageArray;
+
 	// Function override for equipping weapons on a the character.
 	virtual void OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName HandSocketName = FName();
+
+	virtual void BeginPlay() override;
 };

@@ -7,6 +7,11 @@
 #include "Naturesymphony/Components/Public/CombatComponent.h"
 #include "GameFramework/Character.h"
 
+void ABaseWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 // Function for equipping weapons on a the character.
 void ABaseWeapon::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
 {

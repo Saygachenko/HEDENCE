@@ -28,6 +28,6 @@ public:
 	void UpdateCombatType(ECombatType CombatType);
 
 	// Function implemented in the blueprint class ABP
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void UpdateCombatEnabled(bool CombatEnabled);
 };

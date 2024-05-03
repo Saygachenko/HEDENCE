@@ -13,6 +13,8 @@ class NATURESYMPHONY_API UCombatComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	int32 AttackCount = 0;
+
 	// Sets default values for this component's properties
 	UCombatComponent();
 
@@ -27,6 +29,18 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool GetCombatEnabled() { return bCombatEnabled; };
 
+	void SetIsAttaking(bool bIsAttaked) { bIsAttacking = bIsAttaked; };
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsAttaking() { return bIsAttacking; };
+
+	void SetIsAttackSaved(bool bIsAttackedSaved) { bIsAttackSaved = bIsAttackedSaved; };
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsAttackSaved() { return bIsAttackSaved; };
+
+	void ResetAttack();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -35,5 +49,9 @@ private:
 	UPROPERTY()
 	class ABaseWeapon* MainWeapon = nullptr;
 
+	bool bIsAttackSaved = false;
+
 	bool bCombatEnabled = false;
+
+	bool bIsAttacking = false;
 };

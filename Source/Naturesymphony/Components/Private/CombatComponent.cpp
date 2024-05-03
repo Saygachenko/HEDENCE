@@ -35,6 +35,7 @@ void UCombatComponent::SetMainWeapon(ABaseWeapon* NewWeapon)
 		if (MainWeapon)
 		{
 			MainWeapon->OnUnequipped();
+			MainWeapon->Destroy();
 		}
 
 		MainWeapon = NewWeapon;
@@ -66,4 +67,11 @@ void UCombatComponent::SetCombatEnabled(bool CombatEnabled)
 			}
 		}
 	}
+}
+
+void UCombatComponent::ResetAttack()
+{
+	AttackCount = 0;
+	bIsAttacking = false;
+	bIsAttackSaved = false;
 }

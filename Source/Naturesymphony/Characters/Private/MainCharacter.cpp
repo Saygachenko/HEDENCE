@@ -94,6 +94,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::OnEquipedItem);
+		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::LightAttack);
 	}
 }
 
@@ -202,16 +203,87 @@ void AMainCharacter::OnEquipedItem()
 {
 	if (CombatComponent)
 	{
-		if (CombatComponent->GetMainWeapon())
+		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+		if (MainWeapon)
 		{
 			if (!CombatComponent->GetCombatEnabled())
 			{
-				PlayAnimMontage(CombatComponent->GetMainWeapon()->EnterCombat);
+				PlayAnimMontage(MainWeapon->EnterCombat);
 			}
 			else
 			{
-				PlayAnimMontage(CombatComponent->GetMainWeapon()->ExitCombat);
+				PlayAnimMontage(MainWeapon->ExitCombat);
 			}
 		}
+	}
+}
+
+void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
+{
+	if (CombatComponent)
+	{
+		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+		if (MainWeapon)
+		{
+			UAnimMontage* AttackMontage = nullptr;
+
+			if (bRandomIndex)
+			{
+				AttackIndex = FMath::RandRange(0, MainWeapon->AttackMontageArray.Num() - 1);
+				AttackMontage = MainWeapon->AttackMontageArray[AttackIndex];
+			}
+			else
+			{
+				AttackMontage = MainWeapon->AttackMontageArray[AttackIndex];
+			}
+
+			if (AttackMontage)
+			{
+				CombatComponent->SetIsAttaking(true);
+				PlayAnimMontage(AttackMontage);
+
+				CombatComponent->AttackCount++;
+				if (CombatComponent->AttackCount > MainWeapon->AttackMontageArray.Num() - 1)
+				{
+					CombatComponent->AttackCount = 0;
+				}
+			}
+		}
+	}
+}
+
+void AMainCharacter::LightAttack()
+{
+	if (CombatComponent)
+	{
+		if (CombatComponent->GetIsAttaking())
+		{
+			CombatComponent->SetIsAttackSaved(true);
+		}
+		else
+		{
+			PerformAttack(CombatComponent->AttackCount, false);
+		}
+	}
+}
+
+void AMainCharacter::ContinueAttack_Implementation()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->SetIsAttaking(false);
+
+		if (CombatComponent->GetIsAttackSaved())
+		{
+			CombatComponent->SetIsAttackSaved(false);
+		}
+	}
+}
+
+void AMainCharacter::ResetAttack_Implementation()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->ResetAttack();
 	}
 }

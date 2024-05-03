@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Naturesymphony/Characters/Public/CombatInterface.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -12,7 +13,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class NATURESYMPHONY_API AMainCharacter : public ACharacter
+class NATURESYMPHONY_API AMainCharacter : public ACharacter, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void ContinueAttack_Implementation() override;
+
+	void ResetAttack_Implementation() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -69,6 +74,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* InteractInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* LightAttackInputAction;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -95,6 +103,9 @@ protected:
 	// Function delegate death Character
 	UFUNCTION()
 	void OnDeath();
+
+	UFUNCTION(BlueprintCallable)
+	void PerformAttack(int32 AttackIndex, bool bRandomIndex);
 
 private:
 	// Function movement for character
@@ -125,4 +136,6 @@ private:
 
 	// Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
 	void OnEquipedItem();
+
+	void LightAttack();
 };
