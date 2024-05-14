@@ -193,7 +193,7 @@ bool UInventorySystemComponent::CreateNewStack(FName ItemID, int32 Quantity)
 }
 
 // Function for moving through slots
-void UInventorySystemComponent::TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
+void UInventorySystemComponent::TransferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex)
 {
 	if (DestinationIndex >= 0)
 	{

@@ -122,7 +122,7 @@ private:
 
 	// Function for moving through slots
 	UFUNCTION(BlueprintCallable)
-	void TrasferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex);
+	void TransferSlots(int32 SourceIndex, UInventorySystemComponent* SourceInventory, int32 DestinationIndex);
 
 	// Function spawn item in world
 	UFUNCTION(BlueprintCallable)
