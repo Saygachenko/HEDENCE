@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* InventoryInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* MenuInputAction;
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> HUDScreenClass;
@@ -35,12 +38,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> InventoryMenuClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> MenuClass;
+
 	UPROPERTY()
 	UUserWidget* HUDScreen = nullptr;
 
 	UPROPERTY()
 	UUserWidget* InventoryMenu = nullptr;
 
+	UPROPERTY()
+	UUserWidget* Menu = nullptr;
+
 	// Function to open menu inventory
+	void OpenInventoryMenu();
+
+	// Function to open menu
 	void OpenMenu();
 };

@@ -25,16 +25,40 @@ void AMainPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
-		Input->BindAction(InventoryInputAction, ETriggerEvent::Started, this, &AMainPlayerController::OpenMenu);
+		Input->BindAction(InventoryInputAction, ETriggerEvent::Started, this, &AMainPlayerController::OpenInventoryMenu);
+		Input->BindAction(MenuInputAction, ETriggerEvent::Started, this, &AMainPlayerController::OpenMenu);
 	}
 }
 
 // Function to open menu inventory
-void AMainPlayerController::OpenMenu()
+void AMainPlayerController::OpenInventoryMenu()
 {
 	InventoryMenu = CreateWidget(this, InventoryMenuClass);
 	if (InventoryMenu != nullptr)
 	{
 		InventoryMenu->AddToViewport();
+	}
+}
+
+// Function to open menu
+void AMainPlayerController::OpenMenu()
+{
+	if (MenuClass)
+	{
+		if (Menu)
+		{
+			if (!Menu->IsInViewport())
+			{
+				Menu->AddToViewport();
+			}
+		}
+		else
+		{
+			Menu = CreateWidget(this, MenuClass);
+			if (Menu)
+			{
+				Menu->AddToViewport();
+			}
+		}
 	}
 }
