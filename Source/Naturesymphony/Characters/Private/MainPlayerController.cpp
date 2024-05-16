@@ -11,10 +11,13 @@
 // Called when the game starts
 void AMainPlayerController::BeginPlay()
 {
-	HUDScreen = CreateWidget(this, HUDScreenClass);
-	if (HUDScreen)
+	if (HUDScreenClass)
 	{
-		HUDScreen->AddToViewport();
+		HUDScreen = CreateWidget(this, HUDScreenClass);
+		if (HUDScreen)
+		{
+			HUDScreen->AddToViewport();
+		}
 	}
 }
 
@@ -33,10 +36,23 @@ void AMainPlayerController::SetupInputComponent()
 // Function to open menu inventory
 void AMainPlayerController::OpenInventoryMenu()
 {
-	InventoryMenu = CreateWidget(this, InventoryMenuClass);
-	if (InventoryMenu != nullptr)
+	if (InventoryMenuClass)
 	{
-		InventoryMenu->AddToViewport();
+		if (InventoryMenu)
+		{
+			if (!InventoryMenu->IsInViewport())
+			{
+				InventoryMenu->AddToViewport();
+			}
+		}
+		else
+		{
+			InventoryMenu = CreateWidget(this, InventoryMenuClass);
+			if (InventoryMenu != nullptr)
+			{
+				InventoryMenu->AddToViewport();
+			}
+		}
 	}
 }
 
