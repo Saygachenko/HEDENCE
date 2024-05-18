@@ -6,6 +6,12 @@
 #include "Naturesymphony/Characters/Public/MainPlayerAnimInstance.h"
 #include "Naturesymphony/Components/Public/CombatComponent.h"
 #include "GameFramework/Character.h"
+#include "CollisionComponent.h"
+
+ABaseWeapon::ABaseWeapon()
+{
+	CollisionComponent = CreateDefaultSubobject<UCollisionComponent>(FName("CollisionComponent"));
+}
 
 void ABaseWeapon::BeginPlay()
 {
@@ -48,6 +54,12 @@ void ABaseWeapon::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
 						if (OwnerMainPlayerAnimInstance)
 						{
 							OwnerMainPlayerAnimInstance->Execute_UpdateCombatType(OwnerMainPlayerAnimInstance, CombatType);
+
+							if (CollisionComponent)
+							{
+								CollisionComponent->SetCollisionMesh(GetItemMesh());
+								CollisionComponent->AddActorToIgnore(OwnerCharacter);
+							}
 						}
 					}
 				}

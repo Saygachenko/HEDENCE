@@ -24,12 +24,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> AttackMontageArray;
 
+	ABaseWeapon();
+
 	// Function override for equipping weapons on a the character.
 	virtual void OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName HandSocketName = FName();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UCollisionComponent* CollisionComponent;
 
 	virtual void BeginPlay() override;
 };
