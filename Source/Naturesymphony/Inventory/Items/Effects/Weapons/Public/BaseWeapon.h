@@ -27,7 +27,7 @@ public:
 	ABaseWeapon();
 
 	// Function override for equipping weapons on a the character.
-	virtual void OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType) override;
+	virtual void OnEquipped(ECombatType CombatType) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -36,5 +36,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UCollisionComponent* CollisionComponent;
 
+	UPROPERTY(EditDefaultsOnly)
+	float BaseDamage = 0.0f;
+
 	virtual void BeginPlay() override;
+
+private:
+	UFUNCTION()
+	void OnHit(const FHitResult& HitResult);
 };

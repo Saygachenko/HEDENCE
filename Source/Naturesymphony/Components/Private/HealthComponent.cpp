@@ -3,6 +3,8 @@
 
 #include "Naturesymphony/Components/Public/HealthComponent.h"
 
+#include "GameFramework/Character.h"
+
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
@@ -19,7 +21,7 @@ void UHealthComponent::BeginPlay()
 
 	Health = MaxHealth;
 
-	AActor* ComponentOwner = GetOwner();
+	ComponentOwner = GetOwner();
 	if (ComponentOwner)
 	{
 		ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnTakeAnyDagame);
@@ -41,12 +43,24 @@ bool UHealthComponent::bIsDead()
 // Function delegate take damage information
 void UHealthComponent::OnTakeAnyDagame(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
-	UE_LOG(LogTemp, Error, TEXT("Health: %f"), Health);
-
-	if (bIsDead())
+	if (ComponentOwner)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnDeath!"));
-		OnDeath.Broadcast();
+		ACharacter* CharacterOwner = Cast<ACharacter>(ComponentOwner);
+		if (CharacterOwner)
+		{
+			Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+			UE_LOG(LogTemp, Error, TEXT("Health: %f"), Health);
+
+			if (InpactResponce)
+			{
+				CharacterOwner->PlayAnimMontage(InpactResponce);
+			}
+
+			if (bIsDead())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("OnDeath!"));
+				OnDeath.Broadcast();
+			}
+		}
 	}
 }

@@ -13,15 +13,12 @@ class NATURESYMPHONY_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	FOnDeathSignature OnDeath;
+
 	// Sets default values for this component's properties
 	UHealthComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:
 	// Function returns HealthPercent variable
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
@@ -30,14 +27,21 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool bIsDead();
 
-	FOnDeathSignature OnDeath;
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta=(ClampMin = 0.0f, ClampMax = 1000.0f))
 	float MaxHealth = 100.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* InpactResponce = nullptr;
+
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
 private:
 	float Health = 0.0f;
+
+	UPROPERTY()
+	AActor* ComponentOwner = nullptr;
 
 	// Function delegate take damage information
 	UFUNCTION()

@@ -23,7 +23,7 @@ public:
 
 	// Function attach actor on a character
 	UFUNCTION(BlueprintCallable)
-	void AttachActor(ACharacter* CharacterOwner, FName SocketName);
+	void AttachActor(FName SocketName);
 
 	void SetIsEuqipped(bool IsEquipped) { bIsEquipped = IsEquipped; };
 
@@ -47,7 +47,7 @@ protected:
 
 	// Basic function of equipping item on a character
 	UFUNCTION(BlueprintCallable)
-	virtual void OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType);
+	virtual void OnEquipped(ECombatType CombatType);
 
 private:
 	bool bIsEquipped = false;

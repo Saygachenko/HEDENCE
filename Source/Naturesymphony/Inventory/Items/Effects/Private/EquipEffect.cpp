@@ -37,11 +37,11 @@ UPrimitiveComponent* AEquipEffect::GetItemMesh()
 }
 
 // Basic function of equipping item on a character
-void AEquipEffect::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
+void AEquipEffect::OnEquipped(ECombatType CombatType)
 {
 	bIsEquipped = true;
 
-	AttachActor(CharacterOwner, AttachSocketName);
+	AttachActor(AttachSocketName);
 }
 
 // Function checks IsEquipped item
@@ -54,14 +54,19 @@ void AEquipEffect::OnUnequipped()
 }
 
 // Function attach actor on a character
-void AEquipEffect::AttachActor(ACharacter* CharacterOwner, FName SocketName)
+void AEquipEffect::AttachActor(FName SocketName)
 {
-	if (CharacterOwner)
+	AActor* OwnerEffects = GetOwner();
+	if (OwnerEffects)
 	{
-		USkeletalMeshComponent* CharacterMeshComponent = CharacterOwner->GetMesh();
-		if (CharacterMeshComponent)
+		ACharacter* CharacterOwner = Cast<ACharacter>(OwnerEffects);
+		if (CharacterOwner)
 		{
-			this->AttachToComponent(CharacterMeshComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), SocketName);
+			USkeletalMeshComponent* CharacterMeshComponent = CharacterOwner->GetMesh();
+			if (CharacterMeshComponent)
+			{
+				this->AttachToComponent(CharacterMeshComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), SocketName);
+			}
 		}
 	}
 }

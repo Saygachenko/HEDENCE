@@ -7,6 +7,8 @@
 #include "Naturesymphony/Components/Public/CombatComponent.h"
 #include "GameFramework/Character.h"
 #include "CollisionComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/Controller.h"
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -16,13 +18,33 @@ ABaseWeapon::ABaseWeapon()
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CollisionComponent->OnCollisionHit.AddDynamic(this, &ABaseWeapon::OnHit);
+}
+
+void ABaseWeapon::OnHit(const FHitResult& HitResult)
+{
+	AActor* OwnerWeapon = GetOwner();
+	if (OwnerWeapon)
+	{
+		AActor* DamagedActor = HitResult.GetActor();
+		if (DamagedActor)
+		{
+			AController* InstigatorController = OwnerWeapon->GetInstigatorController();
+			if (InstigatorController)
+			{
+				UGameplayStatics::ApplyPointDamage(DamagedActor, BaseDamage, OwnerWeapon->GetActorForwardVector(), HitResult, InstigatorController, this, UDamageType::StaticClass());
+			}
+		}
+	}
 }
 
 // Function for equipping weapons on a the character.
-void ABaseWeapon::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
+void ABaseWeapon::OnEquipped(ECombatType CombatType)
 {
-	Super::OnEquipped(CharacterOwner, CombatType);
+	Super::OnEquipped(CombatType);
 
+	AActor* CharacterOwner = GetOwner();
 	if (CharacterOwner)
 	{
 		UCombatComponent* CombatComponent = CharacterOwner->GetComponentByClass<UCombatComponent>();
@@ -35,11 +57,11 @@ void ABaseWeapon::OnEquipped(ACharacter* CharacterOwner, ECombatType CombatType)
 
 				if (CombatComponent->GetCombatEnabled())
 				{
-					AttachActor(OwnerCharacter, HandSocketName);
+					AttachActor(HandSocketName);
 				}
 				else
 				{
-					AttachActor(OwnerCharacter, AttachSocketName);
+					AttachActor(AttachSocketName);
 				}
 
 				CombatComponent->SetMainWeapon(this);

@@ -439,11 +439,13 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 					AItemEffect* SpawnedItemEffect = World->SpawnActor<ABaseWeapon>(ItemEffectData, OwnerLocation, FRotator::ZeroRotator);
 					if (SpawnedItemEffect)
 					{
+						SpawnedItemEffect->SetOwner(CharacterOwner);
+
 						ABaseWeapon* BaseWeaponEffect = Cast<ABaseWeapon>(SpawnedItemEffect);
 						if (BaseWeaponEffect)
 						{
 							ECombatType CombatType = GetItemData(ConsumeID).CombatType;
-							BaseWeaponEffect->OnEquipped(CharacterOwner, CombatType);
+							BaseWeaponEffect->OnEquipped(CombatType);
 						}
 
 						RemoveFromInventory(IndexSlot, false, true);
