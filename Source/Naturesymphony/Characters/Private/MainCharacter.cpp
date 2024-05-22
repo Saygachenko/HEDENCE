@@ -223,7 +223,7 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 	if (CombatComponent)
 	{
 		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-		if (MainWeapon)
+		if (MainWeapon && MainWeapon->GetIsEquippedToHand())
 		{
 			UAnimMontage* AttackMontage = nullptr;
 
@@ -237,13 +237,13 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 				AttackMontage = MainWeapon->AttackMontageArray[AttackIndex];
 			}
 
-			if (AttackMontage)
+			if(AttackMontage)
 			{
 				CombatComponent->SetIsAttaking(true);
 				PlayAnimMontage(AttackMontage);
 
 				CombatComponent->AttackCount++;
-				if (CombatComponent->AttackCount > MainWeapon->AttackMontageArray.Num() - 1)
+				if (CombatComponent->AttackCount >= MainWeapon->AttackMontageArray.Num())
 				{
 					CombatComponent->AttackCount = 0;
 				}

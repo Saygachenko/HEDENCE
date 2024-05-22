@@ -29,7 +29,6 @@ void UCombatComponent::BeginPlay()
 // Function for set main weapon
 void UCombatComponent::SetMainWeapon(ABaseWeapon* NewWeapon)
 {
-
 	if (NewWeapon)
 	{
 		if (MainWeapon)
@@ -40,7 +39,6 @@ void UCombatComponent::SetMainWeapon(ABaseWeapon* NewWeapon)
 
 		MainWeapon = NewWeapon;
 	}
-
 }
 
 void UCombatComponent::SetCombatEnabled(bool CombatEnabled)

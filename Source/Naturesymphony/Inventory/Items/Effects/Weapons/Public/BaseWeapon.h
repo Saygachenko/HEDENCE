@@ -29,6 +29,12 @@ public:
 	// Function override for equipping weapons on a the character.
 	virtual void OnEquipped(ECombatType CombatType) override;
 
+	UFUNCTION(BlueprintPure)
+	bool GetIsEquippedToHand() { return bIsEquippedToHand; };
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsEquippedToHand(bool bEquippedToHand) { bIsEquippedToHand = bEquippedToHand; };
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName HandSocketName = FName();
@@ -42,6 +48,8 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	bool bIsEquippedToHand = false;
+
 	UFUNCTION()
 	void OnHit(const FHitResult& HitResult);
 };
