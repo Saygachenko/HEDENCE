@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ResetAttack();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	FRotator GetDesiredRotation();
 };

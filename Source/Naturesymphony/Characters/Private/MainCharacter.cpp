@@ -17,6 +17,7 @@
 #include "Naturesymphony/Components/Public/InventorySystemComponent.h"
 #include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
 #include "Naturesymphony/Components/Public/CombatComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -95,6 +96,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::OnEquipedItem);
 		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::LightAttack);
+		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::Dodge);
 	}
 }
 
@@ -174,7 +176,7 @@ void AMainCharacter::OnDeath()
 	{
 		GetCharacterMovement()->DisableMovement();
 		GetMesh()->SetSimulatePhysics(true);
-		GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		GetCapsuleComponent()->DestroyComponent();
 		SetLifeSpan(5.0f);
 	}
 }
@@ -252,6 +254,7 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 	}
 }
 
+// Function for inputting a weapon attack to the LKM button
 void AMainCharacter::LightAttack()
 {
 	if (CombatComponent)
@@ -285,5 +288,74 @@ void AMainCharacter::ResetAttack_Implementation()
 	if (CombatComponent)
 	{
 		CombatComponent->ResetAttack();
+		bIsDodging = false;
 	}
+}
+
+void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
+{
+	ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+	if (MainWeapon)
+	{
+		UAnimMontage* DodgeMontage = nullptr;
+
+		if (bRandomIndex)
+		{
+			DodgeIndex = FMath::RandRange(0, MainWeapon->DodgeMontageArray.Num() - 1);
+			DodgeMontage = MainWeapon->DodgeMontageArray[DodgeIndex];
+		}
+		else
+		{
+			DodgeMontage = MainWeapon->DodgeMontageArray[DodgeIndex];
+		}
+
+		if (DodgeMontage)
+		{
+			bIsDodging = true;
+			PlayAnimMontage(DodgeMontage);
+
+			MainWeapon->DodgeCount++;
+			if (MainWeapon->DodgeCount >= MainWeapon->DodgeMontageArray.Num())
+			{
+				MainWeapon->DodgeCount = 0;
+			}
+		}
+	}
+}
+
+// Function for inputtings a Character dodge on the SPACE button
+void AMainCharacter::Dodge()
+{
+	if (CombatComponent)
+	{
+		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+		if (MainWeapon)
+		{
+			if (!CombatComponent->GetIsAttaking() && !bIsDodging)
+			{
+				PerformDodge(MainWeapon->DodgeCount, false);
+			}
+		}
+	}
+}
+
+FRotator AMainCharacter::GetDesiredRotation_Implementation()
+{
+	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+	if (CharacterMovementComponent)
+	{
+		FVector LastInputVector = CharacterMovementComponent->GetLastInputVector();
+
+		bool bIsNotEqual = UKismetMathLibrary::EqualEqual_VectorVector(LastInputVector, FVector(0.0f, 0.0f, 0.0f), 0.001f);
+		if (!bIsNotEqual)
+		{
+			return FRotator(GetLastMovementInputVector().Rotation());
+		}
+		else
+		{
+			return GetActorRotation();
+		}
+	}
+
+	return FRotator();
 }

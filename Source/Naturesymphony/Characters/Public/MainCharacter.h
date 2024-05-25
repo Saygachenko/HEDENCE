@@ -31,6 +31,8 @@ public:
 
 	void ResetAttack_Implementation() override;
 
+	FRotator GetDesiredRotation_Implementation() override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UCameraComponent* CameraComponent;
@@ -77,6 +79,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* LightAttackInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* DodgeInputAction;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -108,6 +113,8 @@ protected:
 	void PerformAttack(int32 AttackIndex, bool bRandomIndex);
 
 private:
+	bool bIsDodging = false;
+
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -137,5 +144,11 @@ private:
 	// Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
 	void OnEquipedItem();
 
+	// Function for inputting a weapon attack to the LKM button
 	void LightAttack();
+
+	void PerformDodge(int32 DodgeIndex, bool bRandomIndex);
+
+	// Function for inputtings a Character dodge on the SPACE button
+	void Dodge();
 };
