@@ -151,4 +151,6 @@ private:
 
 	// Function for inputtings a Character dodge on the SPACE button
 	void Dodge();
+
+	virtual void Jump() override;
 };

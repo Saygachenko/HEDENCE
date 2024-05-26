@@ -148,9 +148,16 @@ void AMainCharacter::StopWalkMovement()
 // Function started crouch for character
 void AMainCharacter::Crouch(bool bClientSimulation)
 {
-	if (!GetCharacterMovement()->IsFalling())
+	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+	if (CharacterMovementComponent)
 	{
-		Super::Crouch(bClientSimulation);
+		if (CombatComponent)
+		{
+			if (!CharacterMovementComponent->IsFalling() && !CombatComponent->GetIsAttaking() && !bIsDodging)
+			{
+				Super::Crouch(bClientSimulation);
+			}
+		}
 	}
 }
 
@@ -172,12 +179,26 @@ void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 // Function delegate death Character
 void AMainCharacter::OnDeath()
 {
-	if (GetCharacterMovement() && GetMesh() && GetCapsuleComponent())
-	{
-		GetCharacterMovement()->DisableMovement();
-		GetMesh()->SetSimulatePhysics(true);
-		GetCapsuleComponent()->DestroyComponent();
-		SetLifeSpan(5.0f);
+	UCharacterMovementComponent* CharactermMovementComponent = GetCharacterMovement();
+	if (CharactermMovementComponent)
+	{	
+		USkeletalMeshComponent* SkeletalMeshComponent = GetMesh();
+		if (SkeletalMeshComponent)
+		{
+			UCapsuleComponent* MainCapsuleComponent = GetCapsuleComponent();
+			if (MainCapsuleComponent)
+			{
+				if (SpringArmComponent)
+				{
+					CharactermMovementComponent->DisableMovement();
+					SkeletalMeshComponent->SetSimulatePhysics(true);
+					MainCapsuleComponent->DestroyComponent();
+					SpringArmComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+
+					SetLifeSpan(5.0f);
+				}
+			}
+		}
 	}
 }
 
@@ -259,13 +280,20 @@ void AMainCharacter::LightAttack()
 {
 	if (CombatComponent)
 	{
-		if (CombatComponent->GetIsAttaking())
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
 		{
-			CombatComponent->SetIsAttackSaved(true);
-		}
-		else
-		{
-			PerformAttack(CombatComponent->AttackCount, false);
+			if (!CharacterMovementComponent->IsFalling() && !CharacterMovementComponent->IsCrouching())
+			{
+				if (CombatComponent->GetIsAttaking())
+				{
+					CombatComponent->SetIsAttackSaved(true);
+				}
+				else
+				{
+					PerformAttack(CombatComponent->AttackCount, false);
+				}
+			}
 		}
 	}
 }
@@ -328,12 +356,19 @@ void AMainCharacter::Dodge()
 {
 	if (CombatComponent)
 	{
-		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-		if (MainWeapon)
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
 		{
-			if (!CombatComponent->GetIsAttaking() && !bIsDodging)
+			if (!CharacterMovementComponent->IsFalling())
 			{
-				PerformDodge(MainWeapon->DodgeCount, false);
+				ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+				if (MainWeapon)
+				{
+					if (!CombatComponent->GetIsAttaking() && !bIsDodging)
+					{
+						PerformDodge(MainWeapon->DodgeCount, false);
+					}
+				}
 			}
 		}
 	}
@@ -358,4 +393,15 @@ FRotator AMainCharacter::GetDesiredRotation_Implementation()
 	}
 
 	return FRotator();
+}
+
+void AMainCharacter::Jump()
+{
+	if (CombatComponent)
+	{
+		if (!CombatComponent->GetIsAttaking() && !bIsDodging)
+		{
+			Super::Jump();
+		}
+	}
 }
