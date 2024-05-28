@@ -70,6 +70,5 @@ void UCombatComponent::SetCombatEnabled(bool CombatEnabled)
 void UCombatComponent::ResetAttack()
 {
 	AttackCount = 0;
-	bIsAttacking = false;
 	bIsAttackSaved = false;
 }

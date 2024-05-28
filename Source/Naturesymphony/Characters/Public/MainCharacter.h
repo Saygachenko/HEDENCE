@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Naturesymphony/Characters/Public/CombatInterface.h"
+#include "CharacterState.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -35,22 +36,25 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UCameraComponent* CameraComponent;
+	class UCameraComponent* CameraComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class USpringArmComponent* SpringArmComponent;
+	class USpringArmComponent* SpringArmComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UHealthComponent* HealthComponent;
+	class UHealthComponent* HealthComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UInventorySystemComponent* InventorySystemComponent;
+	class UInventorySystemComponent* InventorySystemComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class USphereComponent* CameraCollisionComponent;
+	class USphereComponent* CameraCollisionComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UCombatComponent* CombatComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStateManagerComponent* StateManagerComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputMappingContext* InputMapping;
@@ -113,7 +117,14 @@ protected:
 	void PerformAttack(int32 AttackIndex, bool bRandomIndex);
 
 private:
-	bool bIsDodging = false;
+	UPROPERTY()
+	TArray<ECharacterState> StatesToCheckArray{
+		ECharacterState::Crouching,
+		ECharacterState::Attacking,
+		ECharacterState::Dodging,
+		ECharacterState::Dead,
+		ECharacterState::Equipping,
+		ECharacterState::Jumping };
 
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
@@ -130,11 +141,11 @@ private:
 	// Function started crouch for character
 	virtual void Crouch(bool bClientSimulation) override;
 
-	// Function delegate OnComponentBeginOverlap
+	// Function for delegate OnComponentBeginOverlap
 	UFUNCTION()
 	void OnCameraCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	// Function delegate OnComponentEndOverlap
+	// Function for delegate OnComponentEndOverlap
 	UFUNCTION()
 	void OnCameraCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
@@ -142,15 +153,35 @@ private:
 	void CheckCameraOverlap();
 
 	// Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
-	void OnEquipedItem();
+	void EquipInput();
 
 	// Function for inputting a weapon attack to the LKM button
-	void LightAttack();
+	void AttackInput();
 
 	void PerformDodge(int32 DodgeIndex, bool bRandomIndex);
 
 	// Function for inputtings a Character dodge on the SPACE button
-	void Dodge();
+	void DodgeInput();
 
-	virtual void Jump() override;
+	void Jump() override;
+
+	// Function for delegate FOnStateBeginSignature
+	UFUNCTION()
+	void OnStateBegin(const ECharacterState& CharacterState);
+
+	// Function for delegate FOnStateEndSignature
+	UFUNCTION()
+	void OnStateEnd(const ECharacterState& CharacterState);
+
+	bool CanPerformAttack();
+
+	bool CanPerformDodge();
+
+	void Attack();
+
+	bool CanPerformEquip();
+
+	bool CanPerformJump();
+
+	bool CanPerformCrouch();
 };

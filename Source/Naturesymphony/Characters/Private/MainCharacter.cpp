@@ -18,6 +18,8 @@
 #include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
 #include "Naturesymphony/Components/Public/CombatComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "StateManagerComponent.h"
+#include "CharacterState.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -47,6 +49,8 @@ AMainCharacter::AMainCharacter()
 	CameraCollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(FName("CombatComponent"));
+
+	StateManagerComponent = CreateDefaultSubobject<UStateManagerComponent>(FName("StateManagerComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +73,8 @@ void AMainCharacter::BeginPlay()
 	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
 	CameraCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionBeginOverlap);
 	CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionEndOverlap);
+	StateManagerComponent->OnStateBegin.AddDynamic(this, &AMainCharacter::OnStateBegin);
+	StateManagerComponent->OnStateEnd.AddDynamic(this, &AMainCharacter::OnStateEnd);
 }
 
 // Called every frame
@@ -87,16 +93,16 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		Input->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
-		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AMainCharacter::Jump);
 		Input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
-		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::OnEquipedItem);
-		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::LightAttack);
-		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::Dodge);
+		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::EquipInput);
+		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::AttackInput);
+		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::DodgeInput);
 	}
 }
 
@@ -148,16 +154,9 @@ void AMainCharacter::StopWalkMovement()
 // Function started crouch for character
 void AMainCharacter::Crouch(bool bClientSimulation)
 {
-	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
-	if (CharacterMovementComponent)
+	if (CanPerformCrouch())
 	{
-		if (CombatComponent)
-		{
-			if (!CharacterMovementComponent->IsFalling() && !CombatComponent->GetIsAttaking() && !bIsDodging)
-			{
-				Super::Crouch(bClientSimulation);
-			}
-		}
+		Super::Crouch(bClientSimulation);
 	}
 }
 
@@ -222,20 +221,28 @@ void AMainCharacter::CheckCameraOverlap()
 }
 
 // Function checks the conditions of the variables for weapon availability and weapon-specific combat type, and triggers the animation when the button is pressed.
-void AMainCharacter::OnEquipedItem()
+void AMainCharacter::EquipInput()
 {
-	if (CombatComponent)
+	if (CanPerformEquip())
 	{
-		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-		if (MainWeapon)
+		if (StateManagerComponent)
 		{
-			if (!CombatComponent->GetCombatEnabled())
+			StateManagerComponent->SetState(ECharacterState::Equipping);
+
+			if (CombatComponent)
 			{
-				PlayAnimMontage(MainWeapon->EnterCombat);
-			}
-			else
-			{
-				PlayAnimMontage(MainWeapon->ExitCombat);
+				ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+				if (MainWeapon)
+				{
+					if (!CombatComponent->GetCombatEnabled())
+					{
+						PlayAnimMontage(MainWeapon->EnterCombat);
+					}
+					else
+					{
+						PlayAnimMontage(MainWeapon->ExitCombat);
+					}
+				}
 			}
 		}
 	}
@@ -246,7 +253,7 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 	if (CombatComponent)
 	{
 		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-		if (MainWeapon && MainWeapon->GetIsEquippedToHand())
+		if (MainWeapon && CombatComponent->GetCombatEnabled())
 		{
 			UAnimMontage* AttackMontage = nullptr;
 
@@ -262,7 +269,7 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 
 			if(AttackMontage)
 			{
-				CombatComponent->SetIsAttaking(true);
+				StateManagerComponent->SetState(ECharacterState::Attacking);
 				PlayAnimMontage(AttackMontage);
 
 				CombatComponent->AttackCount++;
@@ -276,23 +283,19 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 }
 
 // Function for inputting a weapon attack to the LKM button
-void AMainCharacter::LightAttack()
+void AMainCharacter::AttackInput()
 {
-	if (CombatComponent)
+	if (StateManagerComponent)
 	{
-		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
-		if (CharacterMovementComponent)
+		if (CombatComponent)
 		{
-			if (!CharacterMovementComponent->IsFalling() && !CharacterMovementComponent->IsCrouching())
+			if (StateManagerComponent->GetCurrentState() == ECharacterState::Attacking)
 			{
-				if (CombatComponent->GetIsAttaking())
-				{
-					CombatComponent->SetIsAttackSaved(true);
-				}
-				else
-				{
-					PerformAttack(CombatComponent->AttackCount, false);
-				}
+				CombatComponent->SetIsAttackSaved(true);
+			}
+			else
+			{
+				Attack();
 			}
 		}
 	}
@@ -302,11 +305,16 @@ void AMainCharacter::ContinueAttack_Implementation()
 {
 	if (CombatComponent)
 	{
-		CombatComponent->SetIsAttaking(false);
-
 		if (CombatComponent->GetIsAttackSaved())
 		{
 			CombatComponent->SetIsAttackSaved(false);
+
+			if (StateManagerComponent->GetCurrentState() == ECharacterState::Attacking)
+			{
+				StateManagerComponent->SetState(ECharacterState::None);
+			}
+
+			Attack();
 		}
 	}
 }
@@ -316,7 +324,7 @@ void AMainCharacter::ResetAttack_Implementation()
 	if (CombatComponent)
 	{
 		CombatComponent->ResetAttack();
-		bIsDodging = false;
+		StateManagerComponent->ResetState();
 	}
 }
 
@@ -339,37 +347,30 @@ void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
 
 		if (DodgeMontage)
 		{
-			bIsDodging = true;
-			PlayAnimMontage(DodgeMontage);
-
-			MainWeapon->DodgeCount++;
-			if (MainWeapon->DodgeCount >= MainWeapon->DodgeMontageArray.Num())
+			if (StateManagerComponent)
 			{
-				MainWeapon->DodgeCount = 0;
+				StateManagerComponent->SetState(ECharacterState::Dodging);
+				PlayAnimMontage(DodgeMontage);
+
+				MainWeapon->DodgeCount++;
+				if (MainWeapon->DodgeCount >= MainWeapon->DodgeMontageArray.Num())
+				{
+					MainWeapon->DodgeCount = 0;
+				}
 			}
 		}
 	}
 }
 
 // Function for inputtings a Character dodge on the SPACE button
-void AMainCharacter::Dodge()
+void AMainCharacter::DodgeInput()
 {
-	if (CombatComponent)
+	if (CanPerformDodge())
 	{
-		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
-		if (CharacterMovementComponent)
+		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+		if (MainWeapon)
 		{
-			if (!CharacterMovementComponent->IsFalling())
-			{
-				ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-				if (MainWeapon)
-				{
-					if (!CombatComponent->GetIsAttaking() && !bIsDodging)
-					{
-						PerformDodge(MainWeapon->DodgeCount, false);
-					}
-				}
-			}
+			PerformDodge(MainWeapon->DodgeCount, false);
 		}
 	}
 }
@@ -397,11 +398,144 @@ FRotator AMainCharacter::GetDesiredRotation_Implementation()
 
 void AMainCharacter::Jump()
 {
-	if (CombatComponent)
+	if (CanPerformJump())
 	{
-		if (!CombatComponent->GetIsAttaking() && !bIsDodging)
+		Super::Jump();
+	}
+}
+
+// Function for delegate FOnStateBeginSignature
+void AMainCharacter::OnStateBegin(const ECharacterState& CharacterState)
+{
+	switch (CharacterState)
+	{
+	case ECharacterState::None:
+		break;
+	case ECharacterState::Crouching:
+		break;
+	case ECharacterState::Attacking:
+		break;
+	case ECharacterState::Dodging:
+		break;
+	case ECharacterState::Dead:
+		break;
+	case ECharacterState::Equipping:
+		break;
+	case ECharacterState::Jumping:
+		break;
+	default:
+		break;
+	}
+}
+
+// Function for delegate FOnStateEndSignature
+void AMainCharacter::OnStateEnd(const ECharacterState& CharacterState)
+{
+	switch (CharacterState)
+	{
+	case ECharacterState::None:
+		break;
+	case ECharacterState::Crouching:
+		break;
+	case ECharacterState::Attacking:
+		break;
+	case ECharacterState::Dodging:
+		break;
+	case ECharacterState::Dead:
+		break;
+	case ECharacterState::Equipping:
+		break;
+	case ECharacterState::Jumping:
+		break;
+	default:
+		break;
+	}
+}
+
+bool AMainCharacter::CanPerformAttack()
+{
+	if (StateManagerComponent)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
 		{
-			Super::Jump();
+			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+			
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
 		}
 	}
+
+	return false;
+}
+
+bool AMainCharacter::CanPerformDodge()
+{
+	if (StateManagerComponent)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+		}
+	}
+
+	return false;
+}
+
+void AMainCharacter::Attack()
+{
+	if (CanPerformAttack())
+	{
+		PerformAttack(CombatComponent->AttackCount, false);
+	}
+}
+
+bool AMainCharacter::CanPerformEquip()
+{
+	if (StateManagerComponent)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+			
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+		}
+	}
+
+	return false;
+}
+
+bool AMainCharacter::CanPerformJump()
+{
+	if (StateManagerComponent)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+		}
+	}
+
+	return false;
+}
+
+bool AMainCharacter::CanPerformCrouch()
+{
+	if (StateManagerComponent)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+		}
+	}
+
+	return false;
 }

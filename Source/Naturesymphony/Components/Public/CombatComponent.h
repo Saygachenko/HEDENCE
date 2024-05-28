@@ -29,11 +29,6 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool GetCombatEnabled() { return bCombatEnabled; };
 
-	void SetIsAttaking(bool bIsAttaked) { bIsAttacking = bIsAttaked; };
-
-	UFUNCTION(BlueprintPure)
-	bool GetIsAttaking() { return bIsAttacking; };
-
 	void SetIsAttackSaved(bool bIsAttackedSaved) { bIsAttackSaved = bIsAttackedSaved; };
 
 	UFUNCTION(BlueprintPure)
@@ -53,5 +48,4 @@ private:
 
 	bool bCombatEnabled = false;
 
-	bool bIsAttacking = false;
 };
