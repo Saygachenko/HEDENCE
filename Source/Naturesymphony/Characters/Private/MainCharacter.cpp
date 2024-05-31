@@ -75,6 +75,8 @@ void AMainCharacter::BeginPlay()
 	CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionEndOverlap);
 	StateManagerComponent->OnStateBegin.AddDynamic(this, &AMainCharacter::OnStateBegin);
 	StateManagerComponent->OnStateEnd.AddDynamic(this, &AMainCharacter::OnStateEnd);
+	StateManagerComponent->OnCharacterActionBegin.AddDynamic(this, &AMainCharacter::OnActionBegin);
+	StateManagerComponent->OnCharacterActionEnd.AddDynamic(this, &AMainCharacter::OnActionEnd);
 }
 
 // Called every frame
@@ -98,7 +100,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
-		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AMainCharacter::UnCrouch, false);
+		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &ACharacter::UnCrouch, false);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::EquipInput);
 		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::AttackInput);
@@ -236,11 +238,13 @@ void AMainCharacter::EquipInput()
 				{
 					if (!CombatComponent->GetCombatEnabled())
 					{
-						PlayAnimMontage(MainWeapon->EnterCombat);
+						TArray<UAnimMontage*> ActionMontage = { MainWeapon->EnterCombat };
+						PerformAction(ActionMontage, ECharacterAction::EnterCombat);
 					}
 					else
 					{
-						PlayAnimMontage(MainWeapon->ExitCombat);
+						TArray<UAnimMontage*> ActionMontage = { MainWeapon->ExitCombat };
+						PerformAction(ActionMontage, ECharacterAction::ExitCombat);
 					}
 				}
 			}
@@ -248,7 +252,7 @@ void AMainCharacter::EquipInput()
 	}
 }
 
-void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
+void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32 AttackIndex, bool bRandomIndex)
 {
 	if (CombatComponent)
 	{
@@ -270,6 +274,8 @@ void AMainCharacter::PerformAttack(int32 AttackIndex, bool bRandomIndex)
 			if(AttackMontage)
 			{
 				StateManagerComponent->SetState(ECharacterState::Attacking);
+				StateManagerComponent->SetCurrentAction(AttackType);
+
 				PlayAnimMontage(AttackMontage);
 
 				CombatComponent->AttackCount++;
@@ -323,8 +329,12 @@ void AMainCharacter::ResetAttack_Implementation()
 {
 	if (CombatComponent)
 	{
-		CombatComponent->ResetAttack();
-		StateManagerComponent->ResetState();
+		if (StateManagerComponent)
+		{
+			CombatComponent->ResetAttack();
+			StateManagerComponent->ResetState();
+			StateManagerComponent->SetCurrentAction(ECharacterAction::None);
+		}
 	}
 }
 
@@ -350,6 +360,8 @@ void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
 			if (StateManagerComponent)
 			{
 				StateManagerComponent->SetState(ECharacterState::Dodging);
+				StateManagerComponent->SetCurrentAction(ECharacterAction::Dodge);
+
 				PlayAnimMontage(DodgeMontage);
 
 				MainWeapon->DodgeCount++;
@@ -400,7 +412,14 @@ void AMainCharacter::Jump()
 {
 	if (CanPerformJump())
 	{
-		Super::Jump();
+		if (StateManagerComponent && CombatComponent)
+		{
+			StopAnimMontage();
+			StateManagerComponent->ResetState();
+			CombatComponent->ResetAttack();
+
+			Super::Jump();
+		}
 	}
 }
 
@@ -411,18 +430,15 @@ void AMainCharacter::OnStateBegin(const ECharacterState& CharacterState)
 	{
 	case ECharacterState::None:
 		break;
-	case ECharacterState::Crouching:
+	case ECharacterState::GeneralActionState:
 		break;
 	case ECharacterState::Attacking:
 		break;
 	case ECharacterState::Dodging:
 		break;
-	case ECharacterState::Dead:
-		break;
 	case ECharacterState::Equipping:
 		break;
-	case ECharacterState::Jumping:
-		break;
+
 	default:
 		break;
 	}
@@ -435,18 +451,15 @@ void AMainCharacter::OnStateEnd(const ECharacterState& CharacterState)
 	{
 	case ECharacterState::None:
 		break;
-	case ECharacterState::Crouching:
+	case ECharacterState::GeneralActionState:
 		break;
 	case ECharacterState::Attacking:
 		break;
 	case ECharacterState::Dodging:
 		break;
-	case ECharacterState::Dead:
-		break;
 	case ECharacterState::Equipping:
 		break;
-	case ECharacterState::Jumping:
-		break;
+
 	default:
 		break;
 	}
@@ -459,6 +472,11 @@ bool AMainCharacter::CanPerformAttack()
 		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
 		if (CharacterMovementComponent)
 		{
+			TArray<ECharacterState> StatesToCheckArray{
+				ECharacterState::GeneralActionState,
+				ECharacterState::Attacking,
+				ECharacterState::Dodging,
+				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 			
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -475,6 +493,10 @@ bool AMainCharacter::CanPerformDodge()
 		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
 		if (CharacterMovementComponent)
 		{
+			TArray<ECharacterState> StatesToCheckArray{
+				ECharacterState::GeneralActionState,
+				ECharacterState::Dodging,
+				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -488,7 +510,7 @@ void AMainCharacter::Attack()
 {
 	if (CanPerformAttack())
 	{
-		PerformAttack(CombatComponent->AttackCount, false);
+		PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
 	}
 }
 
@@ -499,9 +521,17 @@ bool AMainCharacter::CanPerformEquip()
 		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
 		if (CharacterMovementComponent)
 		{
-			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
-			
-			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+			if (CombatComponent)
+			{
+				TArray<ECharacterState> StatesToCheckArray{
+					ECharacterState::GeneralActionState,
+					ECharacterState::Attacking,
+					ECharacterState::Dodging,
+					ECharacterState::Equipping };
+				bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
+
+				return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling()  && CombatComponent->GetMainWeapon();
+			}
 		}
 	}
 
@@ -515,6 +545,10 @@ bool AMainCharacter::CanPerformJump()
 		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
 		if (CharacterMovementComponent)
 		{
+			TArray<ECharacterState> StatesToCheckArray{
+				ECharacterState::GeneralActionState,
+				ECharacterState::Dodging,
+				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -531,6 +565,11 @@ bool AMainCharacter::CanPerformCrouch()
 		UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
 		if (CharacterMovementComponent)
 		{
+			TArray<ECharacterState> StatesToCheckArray{
+				ECharacterState::GeneralActionState,
+				ECharacterState::Attacking,
+				ECharacterState::Dodging,
+				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -538,4 +577,95 @@ bool AMainCharacter::CanPerformCrouch()
 	}
 
 	return false;
+}
+
+void AMainCharacter::OnActionBegin(const ECharacterAction& CharacterAction)
+{
+	switch (CharacterAction)
+	{
+	case ECharacterAction::None:
+		break;
+	case ECharacterAction::GeneralAction:
+		break;
+	case ECharacterAction::LightAttack:
+		break;
+	case ECharacterAction::StrongAttack:
+		break;
+	case ECharacterAction::ChargedAttack:
+		break;
+	case ECharacterAction::FallingAttack:
+		break;
+	case ECharacterAction::Dodge:
+		break;
+	case ECharacterAction::EnterCombat:
+		break;
+	case ECharacterAction::ExitCombat:
+		break;
+
+	default:
+		break;
+	}
+}
+
+void AMainCharacter::OnActionEnd(const ECharacterAction& CharacterAction)
+{
+	switch (CharacterAction)
+	{
+	case ECharacterAction::None:
+		break;
+	case ECharacterAction::GeneralAction:
+		break;
+	case ECharacterAction::LightAttack:
+		break;
+	case ECharacterAction::StrongAttack:
+		break;
+	case ECharacterAction::ChargedAttack:
+		break;
+	case ECharacterAction::FallingAttack:
+		break;
+	case ECharacterAction::Dodge:
+		break;
+	case ECharacterAction::EnterCombat:
+		break;
+	case ECharacterAction::ExitCombat:
+		break;
+
+	default:
+		break;
+	}
+}
+
+void AMainCharacter::PerformAction(TArray<UAnimMontage*> ActionMontages, ECharacterAction CharacterAction, ECharacterState CharacterState, int32 MontageIndex, bool bRandomIndex)
+{
+	ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+	if (MainWeapon)
+	{
+		UAnimMontage* ActionMontage = nullptr;
+
+		if (bRandomIndex)
+		{
+			MontageIndex = FMath::RandRange(0, ActionMontages.Num() - 1);
+			ActionMontage = ActionMontages[MontageIndex];
+		}
+		else
+		{
+			ActionMontage = ActionMontages[MontageIndex];
+		}
+
+		if (ActionMontage)
+		{
+			if (StateManagerComponent)
+			{
+				StateManagerComponent->SetState(CharacterState);
+				StateManagerComponent->SetCurrentAction(CharacterAction);
+
+				PlayAnimMontage(ActionMontage);
+
+				if (MontageIndex >= ActionMontages.Num())
+				{
+					MontageIndex = 0;
+				}
+			}
+		}
+	}
 }

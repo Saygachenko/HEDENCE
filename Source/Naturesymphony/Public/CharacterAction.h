@@ -5,11 +5,15 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class ECharacterState : uint8
+enum class ECharacterAction : uint8
 {
 	None,
-	GeneralActionState,
-	Attacking,
-	Dodging,
-	Equipping,
+	GeneralAction,
+	LightAttack,
+	StrongAttack,
+	ChargedAttack,
+	FallingAttack,
+	Dodge,
+	EnterCombat,
+	ExitCombat
 };

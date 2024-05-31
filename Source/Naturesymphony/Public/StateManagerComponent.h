@@ -5,10 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CharacterState.h"
+#include "CharacterAction.h"
 #include "StateManagerComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStateBeginSignature, const ECharacterState&, CharacterState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStateEndSignature, const ECharacterState&, CharacterState);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterActionBeginSignature, const ECharacterAction&, CharacterAction);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterActionEndSignature, const ECharacterAction&, CharacterAction);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UStateManagerComponent : public UActorComponent
@@ -21,6 +25,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStateEndSignature OnStateEnd;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCharacterActionBeginSignature OnCharacterActionBegin;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCharacterActionEndSignature OnCharacterActionEnd;
 
 	// Sets default values for this component's properties
 	UStateManagerComponent();
@@ -37,10 +47,20 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool IsCurrentStateEqualToAny(TArray<ECharacterState> StatesToCheckArray);
 
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentAction(ECharacterAction NewCharacterAction);
+
+	UFUNCTION(BlueprintPure)
+	ECharacterAction GetCurrentCtion() { return CurrentCharacterAction; };
+
+	UFUNCTION(BlueprintPure)
+	bool IsCurrentActionEqualToAny(TArray<ECharacterAction> ActionsToCheckArray);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:	
 	ECharacterState CurrentState = ECharacterState::None;
+	ECharacterAction CurrentCharacterAction = ECharacterAction::None;
 };

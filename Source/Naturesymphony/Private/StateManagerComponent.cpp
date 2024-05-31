@@ -41,3 +41,18 @@ bool UStateManagerComponent::IsCurrentStateEqualToAny(TArray<ECharacterState> St
 {
 	return StatesToCheckArray.Contains(CurrentState);
 }
+
+void UStateManagerComponent::SetCurrentAction(ECharacterAction NewCharacterAction)
+{
+	if (NewCharacterAction != CurrentCharacterAction)
+	{
+		OnCharacterActionBegin.Broadcast(CurrentCharacterAction);
+		CurrentCharacterAction = NewCharacterAction;
+		OnCharacterActionEnd.Broadcast(CurrentCharacterAction);
+	}
+}
+
+bool UStateManagerComponent::IsCurrentActionEqualToAny(TArray<ECharacterAction> ActionsToCheckArray)
+{
+	return ActionsToCheckArray.Contains(CurrentCharacterAction);
+}

@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Naturesymphony/Characters/Public/CombatInterface.h"
 #include "CharacterState.h"
+#include "CharacterAction.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -114,18 +115,9 @@ protected:
 	void OnDeath();
 
 	UFUNCTION(BlueprintCallable)
-	void PerformAttack(int32 AttackIndex, bool bRandomIndex);
+	void PerformAttack(ECharacterAction AttackType, int32 AttackIndex, bool bRandomIndex);
 
 private:
-	UPROPERTY()
-	TArray<ECharacterState> StatesToCheckArray{
-		ECharacterState::Crouching,
-		ECharacterState::Attacking,
-		ECharacterState::Dodging,
-		ECharacterState::Dead,
-		ECharacterState::Equipping,
-		ECharacterState::Jumping };
-
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -184,4 +176,15 @@ private:
 	bool CanPerformJump();
 
 	bool CanPerformCrouch();
+
+	// Function for delegate FOnCharacterActionBeginSignature
+	UFUNCTION()
+	void OnActionBegin(const ECharacterAction& CharacterAction);
+
+	// Function for delegate FOnCharacterActionEndSignature
+	UFUNCTION()
+	void OnActionEnd(const ECharacterAction& CharacterAction);
+
+	UFUNCTION(BlueprintCallable)
+	void PerformAction(TArray<UAnimMontage*> ActionMontages, ECharacterAction CharacterAction = ECharacterAction::GeneralAction, ECharacterState CharacterState = ECharacterState::GeneralActionState, int32 MontageIndex = 0, bool bRandomIndex = false);
 };
