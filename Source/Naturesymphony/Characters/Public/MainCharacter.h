@@ -7,6 +7,7 @@
 #include "Naturesymphony/Characters/Public/CombatInterface.h"
 #include "CharacterState.h"
 #include "CharacterAction.h"
+#include "MovementSpeedMode.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -20,6 +21,15 @@ class NATURESYMPHONY_API AMainCharacter : public ACharacter, public ICombatInter
 	GENERATED_BODY()
 
 public:	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float WalkingSpeed = 250.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float JoggingSpeed = 600.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float SprintingSpeed = 800.0f;
+
 	// Sets default values for this character's properties
 	AMainCharacter();
 
@@ -34,6 +44,12 @@ public:
 	void ResetAttack_Implementation() override;
 
 	FRotator GetDesiredRotation_Implementation() override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetMovementSpeedMode(EMovementSpeedMode NewSpeedMode);
+
+	UFUNCTION(BlueprintPure)
+	EMovementSpeedMode GetCurrentMovementSpeedMode() { return CurrentMovementSpeedMode; };
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -87,6 +103,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* DodgeInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* SprintInputAction;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -118,6 +137,9 @@ protected:
 	void PerformAttack(ECharacterAction AttackType, int32 AttackIndex, bool bRandomIndex);
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "MovementSpeed");
+	EMovementSpeedMode CurrentMovementSpeedMode = EMovementSpeedMode::Jogging;
+
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -125,10 +147,10 @@ private:
 	void Look(const FInputActionValue& Value);
 
 	// Function started walk for character
-	void StartWalkMovement();
+	void WalkInput();
 
 	// Function stoped walk for character
-	void StopWalkMovement();
+	void StopWalkInput();
 
 	// Function started crouch for character
 	virtual void Crouch(bool bClientSimulation) override;
@@ -187,4 +209,8 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void PerformAction(TArray<UAnimMontage*> ActionMontages, ECharacterAction CharacterAction = ECharacterAction::GeneralAction, ECharacterState CharacterState = ECharacterState::GeneralActionState, int32 MontageIndex = 0, bool bRandomIndex = false);
+
+	void SprintInput();
+
+	void StopSprintInput();
 };

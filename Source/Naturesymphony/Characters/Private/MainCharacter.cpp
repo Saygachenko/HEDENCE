@@ -97,14 +97,16 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AMainCharacter::Jump);
 		Input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::StartWalkMovement);
-		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkMovement);
+		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::WalkInput);
+		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkInput);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &ACharacter::UnCrouch, false);
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::EquipInput);
 		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::AttackInput);
 		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::DodgeInput);
+		Input->BindAction(SprintInputAction, ETriggerEvent::Started, this, &AMainCharacter::SprintInput);
+		Input->BindAction(SprintInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopSprintInput);
 	}
 }
 
@@ -136,20 +138,17 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 }
 
 // Function started walk for character
-void AMainCharacter::StartWalkMovement()
+void AMainCharacter::WalkInput()
 {
-	if(GetCharacterMovement())
-	{ 
-		GetCharacterMovement()->MaxWalkSpeed = 250.0f;
-	}
+	SetMovementSpeedMode(EMovementSpeedMode::Walking);
 }
 
 // Function stoped walk for character
-void AMainCharacter::StopWalkMovement()
+void AMainCharacter::StopWalkInput()
 {
-	if (GetCharacterMovement())
+	if (GetCurrentMovementSpeedMode() == EMovementSpeedMode::Walking)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
 	}
 }
 
@@ -158,7 +157,14 @@ void AMainCharacter::Crouch(bool bClientSimulation)
 {
 	if (CanPerformCrouch())
 	{
-		Super::Crouch(bClientSimulation);
+		if (StateManagerComponent && CombatComponent)
+		{
+			StopAnimMontage();
+			StateManagerComponent->ResetState();
+			CombatComponent->ResetAttack();
+
+			Super::Crouch(bClientSimulation);
+		}
 	}
 }
 
@@ -567,7 +573,6 @@ bool AMainCharacter::CanPerformCrouch()
 		{
 			TArray<ECharacterState> StatesToCheckArray{
 				ECharacterState::GeneralActionState,
-				ECharacterState::Attacking,
 				ECharacterState::Dodging,
 				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
@@ -665,6 +670,50 @@ void AMainCharacter::PerformAction(TArray<UAnimMontage*> ActionMontages, ECharac
 				{
 					MontageIndex = 0;
 				}
+			}
+		}
+	}
+}
+
+void AMainCharacter::SprintInput()
+{
+	SetMovementSpeedMode(EMovementSpeedMode::Sprinting);
+}
+
+void AMainCharacter::StopSprintInput()
+{
+	if (GetCurrentMovementSpeedMode() == EMovementSpeedMode::Sprinting)
+	{
+		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
+	}
+}
+
+void AMainCharacter::SetMovementSpeedMode(EMovementSpeedMode NewSpeedMode)
+{
+	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+	if (CharacterMovementComponent)
+	{
+		if (NewSpeedMode != CurrentMovementSpeedMode)
+		{
+			CurrentMovementSpeedMode = NewSpeedMode;
+
+			switch (CurrentMovementSpeedMode)
+			{
+			case EMovementSpeedMode::Walking:
+				CharacterMovementComponent->MaxWalkSpeed = WalkingSpeed;
+
+				break;
+			case EMovementSpeedMode::Jogging:
+				CharacterMovementComponent->MaxWalkSpeed = JoggingSpeed;
+
+				break;
+			case EMovementSpeedMode::Sprinting:
+				CharacterMovementComponent->MaxWalkSpeed = SprintingSpeed;
+
+				break;
+
+			default:
+				break;
 			}
 		}
 	}
