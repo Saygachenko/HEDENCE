@@ -346,19 +346,18 @@ void AMainCharacter::ResetAttack_Implementation()
 
 void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
 {
-	ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-	if (MainWeapon)
+	if (!DodgeMontageArray.IsEmpty())
 	{
 		UAnimMontage* DodgeMontage = nullptr;
 
 		if (bRandomIndex)
 		{
-			DodgeIndex = FMath::RandRange(0, MainWeapon->DodgeMontageArray.Num() - 1);
-			DodgeMontage = MainWeapon->DodgeMontageArray[DodgeIndex];
+			DodgeIndex = FMath::RandRange(0, DodgeMontageArray.Num() - 1);
+			DodgeMontage = DodgeMontageArray[DodgeIndex];
 		}
 		else
 		{
-			DodgeMontage = MainWeapon->DodgeMontageArray[DodgeIndex];
+			DodgeMontage = DodgeMontageArray[DodgeIndex];
 		}
 
 		if (DodgeMontage)
@@ -370,10 +369,10 @@ void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
 
 				PlayAnimMontage(DodgeMontage);
 
-				MainWeapon->DodgeCount++;
-				if (MainWeapon->DodgeCount >= MainWeapon->DodgeMontageArray.Num())
+				DodgeCount++;
+				if (DodgeCount >= DodgeMontageArray.Num())
 				{
-					MainWeapon->DodgeCount = 0;
+					DodgeCount = 0;
 				}
 			}
 		}
@@ -385,11 +384,7 @@ void AMainCharacter::DodgeInput()
 {
 	if (CanPerformDodge())
 	{
-		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
-		if (MainWeapon)
-		{
-			PerformDodge(MainWeapon->DodgeCount, false);
-		}
+		PerformDodge(DodgeCount, false);
 	}
 }
 

@@ -21,15 +21,6 @@ class NATURESYMPHONY_API AMainCharacter : public ACharacter, public ICombatInter
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
-	float WalkingSpeed = 250.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
-	float JoggingSpeed = 600.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
-	float SprintingSpeed = 800.0f;
-
 	// Sets default values for this character's properties
 	AMainCharacter();
 
@@ -106,13 +97,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	UInputAction* SprintInputAction;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	// Function falling on ground from height and take damage
-	UFUNCTION()
-	void OnGroundLanded(const FHitResult& Hit);
-
 	// Min value for fall from height
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta=(ClampMin = 0.0f, ClampMax = 5000.0f))
 	float MinVelocityZ = 800.0f;
@@ -129,6 +113,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta = (ClampMin = 0.0f, ClampMax = 1000.0f))
 	float MaxDamageLanded = 100.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
+	TArray<UAnimMontage*> DodgeMontageArray;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float WalkingSpeed = 250.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float JoggingSpeed = 600.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
+	float SprintingSpeed = 800.0f;
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	// Function falling on ground from height and take damage
+	UFUNCTION()
+	void OnGroundLanded(const FHitResult& Hit);
+
 	// Function delegate death Character
 	UFUNCTION()
 	void OnDeath();
@@ -139,6 +142,8 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "MovementSpeed");
 	EMovementSpeedMode CurrentMovementSpeedMode = EMovementSpeedMode::Jogging;
+
+	int32 DodgeCount = 0;
 
 	// Function movement for character
 	void Move(const FInputActionValue& Value);

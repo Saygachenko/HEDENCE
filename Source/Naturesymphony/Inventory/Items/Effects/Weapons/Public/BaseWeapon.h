@@ -24,11 +24,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> AttackMontageArray;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
-	TArray<UAnimMontage*> DodgeMontageArray;
-
-	int32 DodgeCount = 0;
-
 	ABaseWeapon();
 
 	// Function override for equipping weapons on a the character.
