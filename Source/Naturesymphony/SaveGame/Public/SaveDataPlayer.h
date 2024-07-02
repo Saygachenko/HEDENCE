@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
-#include "Naturesymphony/Components/Public/InventorySystemComponent.h"
+#include "Naturesymphony/Components/Inventory/Public/InventorySystemComponent.h"
 #include "SaveDataPlayer.generated.h"
 
 /**

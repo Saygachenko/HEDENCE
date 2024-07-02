@@ -26,10 +26,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* InventoryInputAction;
+	TObjectPtr<UInputAction> InventoryInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* MenuInputAction;
+	TObjectPtr<UInputAction> MenuInputAction;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -42,13 +42,10 @@ private:
 	TSubclassOf<UUserWidget> MenuClass;
 
 	UPROPERTY()
-	UUserWidget* HUDScreen = nullptr;
+	TObjectPtr<UUserWidget> InventoryMenu;
 
 	UPROPERTY()
-	UUserWidget* InventoryMenu = nullptr;
-
-	UPROPERTY()
-	UUserWidget* Menu = nullptr;
+	TObjectPtr<UUserWidget> Menu = nullptr;
 
 	// Function to open menu inventory
 	void OpenInventoryMenu();

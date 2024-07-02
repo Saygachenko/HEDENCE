@@ -6,7 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Naturesymphony/Components/Public/HealthComponent.h"
+#include "Naturesymphony/Components/Stats/Public/HealthComponent.h"
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
@@ -14,12 +14,12 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
-#include "Naturesymphony/Components/Public/InventorySystemComponent.h"
-#include "Naturesymphony/Inventory/Items/Effects/Weapons/Public/BaseWeapon.h"
-#include "Naturesymphony/Components/Public/CombatComponent.h"
+#include "Naturesymphony/Components/Inventory/Public/InventorySystemComponent.h"
+#include "Naturesymphony/Inventory/Effects/Public/BaseWeapon.h"
+#include "Naturesymphony/Components/Combat/Public/CombatComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "StateManagerComponent.h"
-#include "CharacterState.h"
+#include "Naturesymphony/Components/Characters/Public/StateManagerComponent.h"
+#include "Naturesymphony/Enums/Characters/Public/CharacterState.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -58,13 +58,17 @@ void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (APlayerController* PlayerController = World->GetFirstPlayerController())
 		{
-			if (InputMapping)
+			if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			{
-				InputSystem->AddMappingContext(InputMapping, 0);
+				if (InputMapping)
+				{
+					InputSystem->AddMappingContext(InputMapping, 0);
+				}
 			}
 		}
 	}
@@ -101,7 +105,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkInput);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &ACharacter::UnCrouch, false);
-		Input->BindAction(InteractInputAction, ETriggerEvent::Started, InventorySystemComponent, &UInventorySystemComponent::Interact);
+		Input->BindAction(InteractInputAction, ETriggerEvent::Started, this, &AMainCharacter::InventoryInput);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::EquipInput);
 		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::AttackInput);
 		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::DodgeInput);
@@ -244,13 +248,11 @@ void AMainCharacter::EquipInput()
 				{
 					if (!CombatComponent->GetCombatEnabled())
 					{
-						TArray<UAnimMontage*> ActionMontage = { MainWeapon->EnterCombat };
-						PerformAction(ActionMontage, ECharacterAction::EnterCombat);
+						PerformAction(ECharacterAction::EnterCombat);
 					}
 					else
 					{
-						TArray<UAnimMontage*> ActionMontage = { MainWeapon->ExitCombat };
-						PerformAction(ActionMontage, ECharacterAction::ExitCombat);
+						PerformAction(ECharacterAction::ExitCombat);
 					}
 				}
 			}
@@ -258,7 +260,7 @@ void AMainCharacter::EquipInput()
 	}
 }
 
-void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32 AttackIndex, bool bRandomIndex)
+void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32& AttackIndex, bool bRandomIndex)
 {
 	if (CombatComponent)
 	{
@@ -266,15 +268,16 @@ void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32 AttackInde
 		if (MainWeapon && CombatComponent->GetCombatEnabled())
 		{
 			UAnimMontage* AttackMontage = nullptr;
+			TArray<UAnimMontage*> AttackMontages = MainWeapon->GetActionMontages(AttackType);
 
 			if (bRandomIndex)
 			{
-				AttackIndex = FMath::RandRange(0, MainWeapon->AttackMontageArray.Num() - 1);
-				AttackMontage = MainWeapon->AttackMontageArray[AttackIndex];
+				AttackIndex = FMath::RandRange(0, AttackMontages.Num() - 1);
+				AttackMontage = AttackMontages[AttackIndex];
 			}
 			else
 			{
-				AttackMontage = MainWeapon->AttackMontageArray[AttackIndex];
+				AttackMontage = AttackMontages[AttackIndex];
 			}
 
 			if(AttackMontage)
@@ -284,11 +287,15 @@ void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32 AttackInde
 
 				PlayAnimMontage(AttackMontage);
 
-				CombatComponent->AttackCount++;
-				if (CombatComponent->AttackCount >= MainWeapon->AttackMontageArray.Num())
+				AttackIndex++;
+				if (AttackIndex >= AttackMontages.Num())
 				{
-					CombatComponent->AttackCount = 0;
+					AttackIndex = 0;
 				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Index: %i is NOT VALID!"), AttackIndex);
 			}
 		}
 	}
@@ -344,7 +351,7 @@ void AMainCharacter::ResetAttack_Implementation()
 	}
 }
 
-void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
+void AMainCharacter::PerformDodge(int32& DodgeIndex, bool bRandomIndex)
 {
 	if (!DodgeMontageArray.IsEmpty())
 	{
@@ -365,14 +372,13 @@ void AMainCharacter::PerformDodge(int32 DodgeIndex, bool bRandomIndex)
 			if (StateManagerComponent)
 			{
 				StateManagerComponent->SetState(ECharacterState::Dodging);
-				StateManagerComponent->SetCurrentAction(ECharacterAction::Dodge);
 
 				PlayAnimMontage(DodgeMontage);
 
-				DodgeCount++;
-				if (DodgeCount >= DodgeMontageArray.Num())
+				DodgeIndex++;
+				if (DodgeIndex >= DodgeMontageArray.Num())
 				{
-					DodgeCount = 0;
+					DodgeIndex = 0;
 				}
 			}
 		}
@@ -589,14 +595,6 @@ void AMainCharacter::OnActionBegin(const ECharacterAction& CharacterAction)
 		break;
 	case ECharacterAction::LightAttack:
 		break;
-	case ECharacterAction::StrongAttack:
-		break;
-	case ECharacterAction::ChargedAttack:
-		break;
-	case ECharacterAction::FallingAttack:
-		break;
-	case ECharacterAction::Dodge:
-		break;
 	case ECharacterAction::EnterCombat:
 		break;
 	case ECharacterAction::ExitCombat:
@@ -617,14 +615,6 @@ void AMainCharacter::OnActionEnd(const ECharacterAction& CharacterAction)
 		break;
 	case ECharacterAction::LightAttack:
 		break;
-	case ECharacterAction::StrongAttack:
-		break;
-	case ECharacterAction::ChargedAttack:
-		break;
-	case ECharacterAction::FallingAttack:
-		break;
-	case ECharacterAction::Dodge:
-		break;
 	case ECharacterAction::EnterCombat:
 		break;
 	case ECharacterAction::ExitCombat:
@@ -635,12 +625,13 @@ void AMainCharacter::OnActionEnd(const ECharacterAction& CharacterAction)
 	}
 }
 
-void AMainCharacter::PerformAction(TArray<UAnimMontage*> ActionMontages, ECharacterAction CharacterAction, ECharacterState CharacterState, int32 MontageIndex, bool bRandomIndex)
+void AMainCharacter::PerformAction(ECharacterAction CharacterAction, ECharacterState CharacterState, int32 MontageIndex, bool bRandomIndex)
 {
 	ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
 	if (MainWeapon)
 	{
 		UAnimMontage* ActionMontage = nullptr;
+		TArray<UAnimMontage*> ActionMontages = MainWeapon->GetActionMontages(CharacterAction);
 
 		if (bRandomIndex)
 		{
@@ -680,6 +671,14 @@ void AMainCharacter::StopSprintInput()
 	if (GetCurrentMovementSpeedMode() == EMovementSpeedMode::Sprinting)
 	{
 		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
+	}
+}
+
+void AMainCharacter::InventoryInput()
+{
+	if (InventorySystemComponent)
+	{
+		InventorySystemComponent->Interact();
 	}
 }
 

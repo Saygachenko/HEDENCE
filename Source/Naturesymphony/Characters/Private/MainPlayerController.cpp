@@ -13,7 +13,7 @@ void AMainPlayerController::BeginPlay()
 {
 	if (HUDScreenClass)
 	{
-		HUDScreen = CreateWidget(this, HUDScreenClass);
+		UUserWidget* HUDScreen = CreateWidget(this, HUDScreenClass);
 		if (HUDScreen)
 		{
 			HUDScreen->AddToViewport();

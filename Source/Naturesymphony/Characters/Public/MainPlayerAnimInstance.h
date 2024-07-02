@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Naturesymphony/Inventory/Public/AnimInstanceInterface.h"
+#include "Naturesymphony/Interfaces/Combat/Public/AnimInstanceInterface.h"
 #include "MainPlayerAnimInstance.generated.h"
 
 /**

@@ -5,7 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
-#include "Naturesymphony/Components/Public/ItemDataComponent.h"
+#include "Naturesymphony/Components/Inventory/Public/ItemDataComponent.h"
 
 void AMainGameModeBase::BeginPlay()
 {

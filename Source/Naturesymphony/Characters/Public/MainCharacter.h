@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Naturesymphony/Characters/Public/CombatInterface.h"
-#include "CharacterState.h"
-#include "CharacterAction.h"
-#include "MovementSpeedMode.h"
+#include "Naturesymphony/Interfaces/Combat/Public/CombatInterface.h"
+#include "Naturesymphony/Enums/Characters/Public/CharacterState.h"
+#include "Naturesymphony/Enums/Combat/Public/CharacterAction.h"
+#include "Naturesymphony/Enums/Characters/Public/MovementSpeedMode.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -44,58 +44,58 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UCameraComponent* CameraComponent = nullptr;
+	TObjectPtr<class UCameraComponent> CameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class USpringArmComponent* SpringArmComponent = nullptr;
+	TObjectPtr<class USpringArmComponent> SpringArmComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UHealthComponent* HealthComponent = nullptr;
+	TObjectPtr<class UHealthComponent> HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UInventorySystemComponent* InventorySystemComponent = nullptr;
+	TObjectPtr<class UInventorySystemComponent> InventorySystemComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class USphereComponent* CameraCollisionComponent = nullptr;
+	TObjectPtr<class USphereComponent> CameraCollisionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UCombatComponent* CombatComponent = nullptr;
+	TObjectPtr<class UCombatComponent> CombatComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UStateManagerComponent* StateManagerComponent = nullptr;
+	TObjectPtr<class UStateManagerComponent> StateManagerComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputMappingContext* InputMapping;
+	TObjectPtr<UInputMappingContext> InputMapping;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* MoveInputAction;
+	TObjectPtr<UInputAction> MoveInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* LookInputAction;
+	TObjectPtr<UInputAction> LookInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* JumpInputAction;
+	TObjectPtr<UInputAction> JumpInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* WalkInputAction;
+	TObjectPtr<UInputAction> WalkInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* CrouchInputAction;
+	TObjectPtr<UInputAction> CrouchInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* EquipWeaponInputAction;
+	TObjectPtr<UInputAction> EquipWeaponInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* InteractInputAction;
+	TObjectPtr<UInputAction> InteractInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* LightAttackInputAction;
+	TObjectPtr<UInputAction> LightAttackInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* DodgeInputAction;
+	TObjectPtr<UInputAction> DodgeInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
-	UInputAction* SprintInputAction;
+	TObjectPtr<UInputAction> SprintInputAction;
 
 	// Min value for fall from height
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta=(ClampMin = 0.0f, ClampMax = 5000.0f))
@@ -114,7 +114,7 @@ protected:
 	float MaxDamageLanded = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
-	TArray<UAnimMontage*> DodgeMontageArray;
+	TArray<TObjectPtr<UAnimMontage>> DodgeMontageArray;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
 	float WalkingSpeed = 250.0f;
@@ -135,9 +135,6 @@ protected:
 	// Function delegate death Character
 	UFUNCTION()
 	void OnDeath();
-
-	UFUNCTION(BlueprintCallable)
-	void PerformAttack(ECharacterAction AttackType, int32 AttackIndex, bool bRandomIndex);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "MovementSpeed");
@@ -177,7 +174,7 @@ private:
 	// Function for inputting a weapon attack to the LKM button
 	void AttackInput();
 
-	void PerformDodge(int32 DodgeIndex, bool bRandomIndex);
+	void PerformDodge(int32& DodgeIndex, bool bRandomIndex);
 
 	// Function for inputtings a Character dodge on the SPACE button
 	void DodgeInput();
@@ -213,9 +210,14 @@ private:
 	void OnActionEnd(const ECharacterAction& CharacterAction);
 
 	UFUNCTION(BlueprintCallable)
-	void PerformAction(TArray<UAnimMontage*> ActionMontages, ECharacterAction CharacterAction = ECharacterAction::GeneralAction, ECharacterState CharacterState = ECharacterState::GeneralActionState, int32 MontageIndex = 0, bool bRandomIndex = false);
+	void PerformAction(ECharacterAction CharacterAction = ECharacterAction::GeneralAction, ECharacterState CharacterState = ECharacterState::GeneralActionState, int32 MontageIndex = 0, bool bRandomIndex = false);
 
 	void SprintInput();
 
 	void StopSprintInput();
+
+	void InventoryInput();
+
+	UFUNCTION(BlueprintCallable)
+	void PerformAttack(ECharacterAction AttackType, int32& AttackIndex, bool bRandomIndex);
 };

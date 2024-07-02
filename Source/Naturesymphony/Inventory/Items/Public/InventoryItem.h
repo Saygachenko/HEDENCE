@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Naturesymphony/Inventory/Public/InteractInterface.h"
+#include "Naturesymphony/Interfaces/Inventory/Public/InteractInterface.h"
 #include "InventoryItem.generated.h"
 
 UCLASS()
@@ -28,14 +28,14 @@ protected:
 	virtual void Destroyed() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	class UItemDataComponent* ItemDataComponent = nullptr;
+	TObjectPtr<class UItemDataComponent> ItemDataComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	USceneComponent* SceneComponent = nullptr;
+	TObjectPtr<USceneComponent> SceneComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UWidgetComponent* WidgetComponent = nullptr;
+	TObjectPtr<class UWidgetComponent> WidgetComponent;
 };

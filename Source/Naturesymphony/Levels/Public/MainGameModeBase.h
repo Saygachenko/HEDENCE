@@ -24,11 +24,11 @@ public:
 	TSubclassOf<USaveDataLevel> SaveDataLevelClass;
 
 	UPROPERTY()
-	USaveDataLevel* SaveDataLevelObject;
+	TObjectPtr<USaveDataLevel> SaveDataLevelObject;
 
 private:
 	UPROPERTY()
-	class USaveGame* LoadGameDataLevel = nullptr;
+	TObjectPtr<class USaveGame> LoadGameDataLevel = nullptr;
 
 	// Set name of level in the BeginPlay() function
 	FString GameDataLevel = "";

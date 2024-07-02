@@ -3,7 +3,7 @@
 
 #include "Naturesymphony/Inventory/Items/Public/InventoryItem.h"
 
-#include "Naturesymphony/Components/Public/ItemDataComponent.h"
+#include "Naturesymphony/Components/Inventory/Public/ItemDataComponent.h"
 #include "Naturesymphony/Levels/Public/MainGameModeBase.h"
 #include "Naturesymphony/SaveGame/Public/SaveDataLevel.h"
 #include "Components/WidgetComponent.h"
