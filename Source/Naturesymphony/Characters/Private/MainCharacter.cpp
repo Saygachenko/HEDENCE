@@ -99,8 +99,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		Input->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
-		Input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AMainCharacter::Jump);
-		Input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		Input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &AMainCharacter::Jump);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Started, this, &AMainCharacter::WalkInput);
 		Input->BindAction(WalkInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopWalkInput);
 		Input->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AMainCharacter::Crouch, false);
@@ -108,9 +107,11 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(InteractInputAction, ETriggerEvent::Started, this, &AMainCharacter::InventoryInput);
 		Input->BindAction(EquipWeaponInputAction, ETriggerEvent::Started, this, &AMainCharacter::EquipInput);
 		Input->BindAction(LightAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::AttackInput);
+		Input->BindAction(LightAttackInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopAttackInput);
 		Input->BindAction(DodgeInputAction, ETriggerEvent::Started, this, &AMainCharacter::DodgeInput);
 		Input->BindAction(SprintInputAction, ETriggerEvent::Started, this, &AMainCharacter::SprintInput);
 		Input->BindAction(SprintInputAction, ETriggerEvent::Completed, this, &AMainCharacter::StopSprintInput);
+		Input->BindAction(JumpAttackInputAction, ETriggerEvent::Started, this, &AMainCharacter::JumpAttackInput);
 	}
 }
 
@@ -277,7 +278,14 @@ void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32& AttackInd
 			}
 			else
 			{
-				AttackMontage = AttackMontages[AttackIndex];
+				if (AttackIndex > AttackMontages.Num())
+				{
+					AttackIndex = 0;
+				}
+				else
+				{
+					AttackMontage = AttackMontages[AttackIndex];
+				}
 			}
 
 			if(AttackMontage)
@@ -419,7 +427,7 @@ void AMainCharacter::Jump()
 {
 	if (CanPerformJump())
 	{
-		if (StateManagerComponent && CombatComponent)
+		if (StateManagerComponent && CombatComponent && !JumpAttack)
 		{
 			StopAnimMontage();
 			StateManagerComponent->ResetState();
@@ -517,7 +525,14 @@ void AMainCharacter::Attack()
 {
 	if (CanPerformAttack())
 	{
-		PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
+		if (JumpAttack)
+		{
+			PerformAttack(ECharacterAction::JumpAttack, CombatComponent->AttackCount, false);
+		}
+		else
+		{
+			PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
+		}
 	}
 }
 
@@ -554,6 +569,7 @@ bool AMainCharacter::CanPerformJump()
 		{
 			TArray<ECharacterState> StatesToCheckArray{
 				ECharacterState::GeneralActionState,
+				ECharacterState::Attacking,
 				ECharacterState::Dodging,
 				ECharacterState::Equipping };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
@@ -711,4 +727,14 @@ void AMainCharacter::SetMovementSpeedMode(EMovementSpeedMode NewSpeedMode)
 			}
 		}
 	}
+}
+
+void AMainCharacter::JumpAttackInput()
+{
+	JumpAttack = true;
+}
+
+void AMainCharacter::StopAttackInput()
+{
+	JumpAttack = false;
 }

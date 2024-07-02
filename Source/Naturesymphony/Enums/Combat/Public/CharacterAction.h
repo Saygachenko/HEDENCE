@@ -10,6 +10,7 @@ enum class ECharacterAction : uint8
 	None,
 	GeneralAction,
 	LightAttack,
+	JumpAttack,
 	EnterCombat,
 	ExitCombat
 };

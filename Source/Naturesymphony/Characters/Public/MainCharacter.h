@@ -97,6 +97,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	TObjectPtr<UInputAction> SprintInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	TObjectPtr<UInputAction> JumpAttackInputAction;
+
 	// Min value for fall from height
 	UPROPERTY(EditDefaultsOnly, Category = "Range|FallGround", meta=(ClampMin = 0.0f, ClampMax = 5000.0f))
 	float MinVelocityZ = 800.0f;
@@ -142,6 +145,8 @@ private:
 
 	int32 DodgeCount = 0;
 
+	bool JumpAttack = false;
+
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -173,6 +178,8 @@ private:
 
 	// Function for inputting a weapon attack to the LKM button
 	void AttackInput();
+
+	void StopAttackInput();
 
 	void PerformDodge(int32& DodgeIndex, bool bRandomIndex);
 
@@ -220,4 +227,6 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void PerformAttack(ECharacterAction AttackType, int32& AttackIndex, bool bRandomIndex);
+
+	void JumpAttackInput();
 };

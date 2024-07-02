@@ -18,7 +18,7 @@ public:
 	// Sets default values for this component's properties
 	UCombatComponent();
 
-	void SetMainWeapon(TObjectPtr<ABaseWeapon> NewWeapon);
+	void SetMainWeapon(ABaseWeapon* NewWeapon);
 
 	UFUNCTION(BlueprintPure)
 	ABaseWeapon* GetMainWeapon() { return MainWeapon; };

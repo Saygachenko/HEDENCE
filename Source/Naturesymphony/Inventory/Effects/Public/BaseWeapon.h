@@ -39,10 +39,13 @@ protected:
 	TObjectPtr<UAnimMontage> EnterCombat;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
-	TObjectPtr<UAnimMontage> ExitCombat = nullptr;
+	TObjectPtr<UAnimMontage> ExitCombat;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
 	TArray<TObjectPtr<UAnimMontage>> LightAttackMontageArray;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
+	TArray<TObjectPtr<UAnimMontage>> JumpAttackMontage;
 
 private:
 	UFUNCTION()

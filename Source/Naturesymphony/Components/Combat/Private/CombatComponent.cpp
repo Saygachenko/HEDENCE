@@ -27,7 +27,7 @@ void UCombatComponent::BeginPlay()
 }
 
 // Function for set main weapon
-void UCombatComponent::SetMainWeapon(TObjectPtr<ABaseWeapon> NewWeapon)
+void UCombatComponent::SetMainWeapon(ABaseWeapon* NewWeapon)
 {
 	if (NewWeapon)
 	{

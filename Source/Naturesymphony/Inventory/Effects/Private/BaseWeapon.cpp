@@ -110,6 +110,11 @@ TArray<UAnimMontage*> ABaseWeapon::GetActionMontages(ECharacterAction CharacterA
 		CharacterActionMontage = LightAttackMontageArray;
 		break;
 
+	case ECharacterAction::JumpAttack:
+
+		CharacterActionMontage = JumpAttackMontage;
+		break;
+
 	case ECharacterAction::EnterCombat:
 
 		CharacterActionMontage.Add(EnterCombat);
