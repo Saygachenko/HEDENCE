@@ -6,7 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Naturesymphony/Components/Stats/Public/HealthComponent.h"
+//#include "Naturesymphony/Components/Stats/Public/HealthComponent.h"
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
@@ -20,6 +20,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Naturesymphony/Components/Characters/Public/StateManagerComponent.h"
 #include "Naturesymphony/Enums/Characters/Public/CharacterState.h"
+#include "Naturesymphony/Components/Stats/Public/StatsComponent.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -33,7 +34,8 @@ AMainCharacter::AMainCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(FName("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("Health"));
+	//HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("Health"));
+	StatsComponent = CreateDefaultSubobject<UStatsComponent>(FName("StatsComponent"));
 	InventorySystemComponent = CreateDefaultSubobject<UInventorySystemComponent>(FName("Inventory"));
 
 	CameraCollisionComponent = CreateDefaultSubobject<USphereComponent>(FName("CameraCollision"));
@@ -74,7 +76,7 @@ void AMainCharacter::BeginPlay()
 	}
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
-	HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
+	//HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
 	CameraCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionBeginOverlap);
 	CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionEndOverlap);
 	StateManagerComponent->OnStateBegin.AddDynamic(this, &AMainCharacter::OnStateBegin);

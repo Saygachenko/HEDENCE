@@ -49,8 +49,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USpringArmComponent> SpringArmComponent;
 
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class UHealthComponent> HealthComponent;*/
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<class UHealthComponent> HealthComponent;
+	TObjectPtr<class UStatsComponent> StatsComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UInventorySystemComponent> InventorySystemComponent;
