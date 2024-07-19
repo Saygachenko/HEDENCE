@@ -6,7 +6,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-//#include "Naturesymphony/Components/Stats/Public/HealthComponent.h"
 #include "GameFrameWork/Character.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
@@ -34,7 +33,6 @@ AMainCharacter::AMainCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(FName("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
-	//HealthComponent = CreateDefaultSubobject<UHealthComponent>(FName("Health"));
 	StatsComponent = CreateDefaultSubobject<UStatsComponent>(FName("StatsComponent"));
 	InventorySystemComponent = CreateDefaultSubobject<UInventorySystemComponent>(FName("Inventory"));
 
@@ -76,13 +74,15 @@ void AMainCharacter::BeginPlay()
 	}
 
 	LandedDelegate.AddDynamic(this, &AMainCharacter::OnGroundLanded);
-	//HealthComponent->OnDeath.AddDynamic(this, &AMainCharacter::OnDeath);
 	CameraCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionBeginOverlap);
 	CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnCameraCollisionEndOverlap);
 	StateManagerComponent->OnStateBegin.AddDynamic(this, &AMainCharacter::OnStateBegin);
 	StateManagerComponent->OnStateEnd.AddDynamic(this, &AMainCharacter::OnStateEnd);
 	StateManagerComponent->OnCharacterActionBegin.AddDynamic(this, &AMainCharacter::OnActionBegin);
 	StateManagerComponent->OnCharacterActionEnd.AddDynamic(this, &AMainCharacter::OnActionEnd);
+	OnTakePointDamage.AddDynamic(this, &AMainCharacter::TakePointDamage);
+
+	StatsComponent->InitializeStats();
 }
 
 // Called every frame
@@ -186,12 +186,11 @@ void AMainCharacter::OnGroundLanded(const FHitResult& Hit)
 		TRange<float> LandedDamageRange(MinDamageLanded, MaxDamageLanded);
 		const float FinalDamage = FMath::GetMappedRangeValueClamped(LandedRangeVelocity, LandedDamageRange, FallVelocityZ);
 		UE_LOG(LogTemp, Display, TEXT("Final Damage: %f"), FinalDamage);
-		TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
+		StatsComponent->TakeDamage(FinalDamage);
 	}
 }
 
-// Function delegate death Character
-void AMainCharacter::OnDeath()
+void AMainCharacter::Death()
 {
 	UCharacterMovementComponent* CharactermMovementComponent = GetCharacterMovement();
 	if (CharactermMovementComponent)
@@ -273,23 +272,22 @@ void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32& AttackInd
 			UAnimMontage* AttackMontage = nullptr;
 			TArray<UAnimMontage*> AttackMontages = MainWeapon->GetActionMontages(AttackType);
 
-			if (bRandomIndex)
+			if (!AttackMontages.IsEmpty())
 			{
-				AttackIndex = FMath::RandRange(0, AttackMontages.Num() - 1);
-				AttackMontage = AttackMontages[AttackIndex];
-			}
-			else
-			{
-				if (AttackIndex > AttackMontages.Num())
+				if (bRandomIndex)
 				{
-					AttackIndex = 0;
+					AttackIndex = FMath::RandRange(0, AttackMontages.Num() - 1);
 				}
 				else
 				{
-					AttackMontage = AttackMontages[AttackIndex];
+					if (AttackIndex >= AttackMontages.Num())
+					{
+						AttackIndex = 0;
+					}
 				}
 			}
 
+			AttackMontage = AttackMontages[AttackIndex];
 			if(AttackMontage)
 			{
 				StateManagerComponent->SetState(ECharacterState::Attacking);
@@ -302,10 +300,6 @@ void AMainCharacter::PerformAttack(ECharacterAction AttackType, int32& AttackInd
 				{
 					AttackIndex = 0;
 				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Index: %i is NOT VALID!"), AttackIndex);
 			}
 		}
 	}
@@ -370,13 +364,9 @@ void AMainCharacter::PerformDodge(int32& DodgeIndex, bool bRandomIndex)
 		if (bRandomIndex)
 		{
 			DodgeIndex = FMath::RandRange(0, DodgeMontageArray.Num() - 1);
-			DodgeMontage = DodgeMontageArray[DodgeIndex];
-		}
-		else
-		{
-			DodgeMontage = DodgeMontageArray[DodgeIndex];
 		}
 
+		DodgeMontage = DodgeMontageArray[DodgeIndex];
 		if (DodgeMontage)
 		{
 			if (StateManagerComponent)
@@ -455,6 +445,10 @@ void AMainCharacter::OnStateBegin(const ECharacterState& CharacterState)
 		break;
 	case ECharacterState::Equipping:
 		break;
+	case ECharacterState::Dead:
+
+		Death();
+		break;
 
 	default:
 		break;
@@ -476,6 +470,8 @@ void AMainCharacter::OnStateEnd(const ECharacterState& CharacterState)
 		break;
 	case ECharacterState::Equipping:
 		break;
+	case ECharacterState::Dead:
+		break;
 
 	default:
 		break;
@@ -493,7 +489,8 @@ bool AMainCharacter::CanPerformAttack()
 				ECharacterState::GeneralActionState,
 				ECharacterState::Attacking,
 				ECharacterState::Dodging,
-				ECharacterState::Equipping };
+				ECharacterState::Equipping,
+				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 			
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -513,7 +510,8 @@ bool AMainCharacter::CanPerformDodge()
 			TArray<ECharacterState> StatesToCheckArray{
 				ECharacterState::GeneralActionState,
 				ECharacterState::Dodging,
-				ECharacterState::Equipping };
+				ECharacterState::Equipping,
+				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -551,7 +549,8 @@ bool AMainCharacter::CanPerformEquip()
 					ECharacterState::GeneralActionState,
 					ECharacterState::Attacking,
 					ECharacterState::Dodging,
-					ECharacterState::Equipping };
+					ECharacterState::Equipping,
+					ECharacterState::Dead };
 				bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 				return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling()  && CombatComponent->GetMainWeapon();
@@ -573,7 +572,8 @@ bool AMainCharacter::CanPerformJump()
 				ECharacterState::GeneralActionState,
 				ECharacterState::Attacking,
 				ECharacterState::Dodging,
-				ECharacterState::Equipping };
+				ECharacterState::Equipping,
+				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -593,7 +593,8 @@ bool AMainCharacter::CanPerformCrouch()
 			TArray<ECharacterState> StatesToCheckArray{
 				ECharacterState::GeneralActionState,
 				ECharacterState::Dodging,
-				ECharacterState::Equipping };
+				ECharacterState::Equipping,
+				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
 			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
@@ -739,4 +740,18 @@ void AMainCharacter::JumpAttackInput()
 void AMainCharacter::StopAttackInput()
 {
 	JumpAttack = false;
+}
+
+void AMainCharacter::TakePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DamagedActor: %s, Damage: %f, DamageCauser: %s, InstigatedBy: %s"), *DamagedActor->GetName(), Damage, *DamageCauser->GetName(), *InstigatedBy->GetName());
+	if (StatsComponent)
+	{
+		StatsComponent->TakeDamage(Damage);
+
+		if (InpactResponce)
+		{
+			PlayAnimMontage(InpactResponce);
+		}
+	}
 }

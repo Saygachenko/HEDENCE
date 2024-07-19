@@ -12,4 +12,5 @@ enum class ECharacterState : uint8
 	Attacking,
 	Dodging,
 	Equipping,
+	Dead
 };

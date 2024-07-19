@@ -131,6 +131,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementSpeed");
 	float SprintingSpeed = 800.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	TObjectPtr<UAnimMontage> InpactResponce;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -138,9 +141,10 @@ protected:
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& Hit);
 
-	// Function delegate death Character
-	UFUNCTION()
-	void OnDeath();
+	void Death();
+
+	UFUNCTION(BlueprintCallable)
+	void TakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "MovementSpeed");

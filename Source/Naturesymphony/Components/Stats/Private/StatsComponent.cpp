@@ -5,6 +5,7 @@
 
 #include "Naturesymphony/Structs/Stats/Public/BaseStat.h"
 #include "Naturesymphony/Enums/Stats/Public/StatsEnum.h"
+#include "Naturesymphony/Components/Characters/Public/StateManagerComponent.h"
 
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
@@ -16,13 +17,11 @@ UStatsComponent::UStatsComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UStatsComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitializeStats();
 }
 
 // Called every frame
@@ -35,13 +34,12 @@ void UStatsComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void UStatsComponent::InitializeStats()
 {
-	for (auto Pair : BaseStats)
+	for (auto& Pair : BaseStats)
 	{
 		EStats Stat = Pair.Key;
 		FBaseStat* FindKey = BaseStats.Find(Stat);
-		float Value = FindKey->BaseValue;
 
-		SetCurrentStatValue(Stat, Value);
+		SetCurrentStatValue(Stat, FindKey->BaseValue);
 	}
 }
 
@@ -53,5 +51,23 @@ void UStatsComponent::ModifyCurrentStatValue(EStats Stat, float Value)
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxStatValue(Stat));
 
 		SetCurrentStatValue(Stat, NewValue);
+	}
+}
+
+void UStatsComponent::TakeDamage(float NewDamage)
+{
+	ModifyCurrentStatValue(EStats::Health, NewDamage * -1.0f);
+
+	if (GetCurrentStatValue(EStats::Health) <= 0.0f)
+	{
+		AActor* Owner = GetOwner();
+		if (Owner)
+		{
+			UStateManagerComponent* OwnerStateManagerComponent = Owner->GetComponentByClass<UStateManagerComponent>();
+			if (OwnerStateManagerComponent)
+			{
+				OwnerStateManagerComponent->SetState(ECharacterState::Dead);
+			}
+		}
 	}
 }

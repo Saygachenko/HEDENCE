@@ -33,6 +33,18 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetMaxStatValue(EStats Stat) { FBaseStat* FindKey = BaseStats.Find(Stat); return FindKey->MaxValue; };
 
+	UFUNCTION(BlueprintCallable)
+	void SetBaseStatValue(EStats Stat, float Value) { FBaseStat* FindKey = BaseStats.Find(Stat); FindKey->BaseValue = Value; };
+
+	UFUNCTION(BlueprintCallable)
+	void SetMaxStatValue(EStats Stat, float Value) { FBaseStat* FindKey = BaseStats.Find(Stat); FindKey->MaxValue = Value; };
+
+	UFUNCTION(BlueprintCallable)
+	void TakeDamage(float NewDamage);
+
+	UFUNCTION(BlueprintCallable)
+	void InitializeStats();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -42,9 +54,6 @@ private:
 	TMap<EStats, FBaseStat> BaseStats;
 
 	TMap<EStats, float> CurrentStats;
-
-	UFUNCTION(BlueprintCallable)
-	void InitializeStats();
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyCurrentStatValue(EStats Stat, float Value);
