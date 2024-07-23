@@ -43,7 +43,7 @@ void UStatsComponent::InitializeStats()
 	}
 }
 
-void UStatsComponent::ModifyCurrentStatValue(EStats Stat, float Value)
+void UStatsComponent::ModifyCurrentStatValue(EStats Stat, float Value, bool bShouldRegenerate)
 {
 	if (Value != 0.0f)
 	{
@@ -51,6 +51,11 @@ void UStatsComponent::ModifyCurrentStatValue(EStats Stat, float Value)
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxStatValue(Stat));
 
 		SetCurrentStatValue(Stat, NewValue);
+
+		if (bShouldRegenerate)
+		{
+			StartRegen(Stat);
+		}
 	}
 }
 
@@ -69,5 +74,47 @@ void UStatsComponent::TakeDamage(float NewDamage)
 				OwnerStateManagerComponent->SetState(ECharacterState::Dead);
 			}
 		}
+	}
+}
+
+void UStatsComponent::RegenStamina()
+{
+	float StaminaRegen = GetCurrentStatValue(EStats::Stamina) + StaminaRegenRate;
+	StaminaRegen = FMath::Clamp(StaminaRegen, 0.0f, GetMaxStatValue(EStats::Stamina));
+	SetCurrentStatValue(EStats::Stamina, StaminaRegen);
+
+	if (GetCurrentStatValue(EStats::Stamina) >= GetMaxStatValue(EStats::Stamina))
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->GetTimerManager().ClearTimer(StartRegenTimer);
+		}
+	}
+}
+
+void UStatsComponent::StartRegen(EStats Stat)
+{
+	switch (Stat)
+	{
+	case EStats::None:
+		break;
+
+	case EStats::Health:
+		break;
+
+	case EStats::Stamina:
+
+		GetWorld()->GetTimerManager().SetTimer(StartRegenTimer, this, &UStatsComponent::RegenStamina, 0.1f, true, 1.5f);
+		break;
+
+	case EStats::Armor:
+		break;
+
+	case EStats::Mana:
+		break;
+
+	default:
+		break;
 	}
 }

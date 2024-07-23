@@ -8,13 +8,17 @@
 #include "Naturesymphony/Enums/Stats/Public/StatsEnum.h"
 #include "StatsComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCurrentStatValueUpdated, EStats, Stat, float, Value);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NATURESYMPHONY_API UStatsComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnCurrentStatValueUpdated OnCurrentStatValueUpdated;
+
 	// Sets default values for this component's properties
 	UStatsComponent();
 
@@ -22,7 +26,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void SetCurrentStatValue(EStats Stat, float Value) { CurrentStats.Add(Stat, Value); };
+	void SetCurrentStatValue(EStats Stat, float Value) { CurrentStats.Add(Stat, Value); OnCurrentStatValueUpdated.Broadcast(Stat, Value); };
 
 	UFUNCTION(BlueprintPure)
 	float GetCurrentStatValue(EStats Stat) { float* Value = CurrentStats.Find(Stat); return Value ? *Value : 0.0f; };
@@ -45,6 +49,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitializeStats();
 
+	UFUNCTION(BlueprintCallable)
+	void StartRegen(EStats Stat);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyCurrentStatValue(EStats Stat, float Value, bool bShouldRegenerate = true);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -55,7 +65,10 @@ private:
 
 	TMap<EStats, float> CurrentStats;
 
-	UFUNCTION(BlueprintCallable)
-	void ModifyCurrentStatValue(EStats Stat, float Value);
-		
+	UPROPERTY(EditDefaultsOnly, Category = "StatRegen")
+	float StaminaRegenRate = 2.0f;
+
+	FTimerHandle StartRegenTimer;
+
+	void RegenStamina();
 };

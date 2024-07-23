@@ -154,6 +154,8 @@ private:
 
 	bool JumpAttack = false;
 
+	FTimerHandle SprintStaminaCostTimer;
+
 	// Function movement for character
 	void Move(const FInputActionValue& Value);
 
@@ -236,4 +238,14 @@ private:
 	void PerformAttack(ECharacterAction AttackType, int32& AttackIndex, bool bRandomIndex);
 
 	void JumpAttackInput();
+
+	UFUNCTION()
+	void OnCurrentStatValueUpdate(EStats Stat, float Value);
+
+	void SprintStaminaCost();
+
+	void DisableSprint();
+
+	UFUNCTION(BlueprintPure)
+	bool CanPerformSprint();
 };

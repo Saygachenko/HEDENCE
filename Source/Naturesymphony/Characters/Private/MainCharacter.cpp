@@ -81,6 +81,7 @@ void AMainCharacter::BeginPlay()
 	StateManagerComponent->OnCharacterActionBegin.AddDynamic(this, &AMainCharacter::OnActionBegin);
 	StateManagerComponent->OnCharacterActionEnd.AddDynamic(this, &AMainCharacter::OnActionEnd);
 	OnTakePointDamage.AddDynamic(this, &AMainCharacter::TakePointDamage);
+	StatsComponent->OnCurrentStatValueUpdated.AddDynamic(this, &AMainCharacter::OnCurrentStatValueUpdate);
 
 	StatsComponent->InitializeStats();
 }
@@ -390,7 +391,11 @@ void AMainCharacter::DodgeInput()
 {
 	if (CanPerformDodge())
 	{
-		PerformDodge(DodgeCount, false);
+		if (StatsComponent)
+		{
+			PerformDodge(DodgeCount, false);
+			StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -30.0f, true);
+		}
 	}
 }
 
@@ -493,7 +498,7 @@ bool AMainCharacter::CanPerformAttack()
 				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 			
-			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling() && CombatComponent->GetCombatEnabled() && StatsComponent->GetCurrentStatValue(EStats::Stamina) >= 10.0f;
 		}
 	}
 
@@ -514,7 +519,7 @@ bool AMainCharacter::CanPerformDodge()
 				ECharacterState::Dead };
 			bool bIsCurrentStateEqualToAny = StateManagerComponent->IsCurrentStateEqualToAny(StatesToCheckArray);
 
-			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling();
+			return !bIsCurrentStateEqualToAny && !CharacterMovementComponent->IsFalling() && StatsComponent->GetCurrentStatValue(EStats::Stamina) >= 10.0f;
 		}
 	}
 
@@ -525,13 +530,18 @@ void AMainCharacter::Attack()
 {
 	if (CanPerformAttack())
 	{
-		if (JumpAttack)
+		if (StatsComponent)
 		{
-			PerformAttack(ECharacterAction::JumpAttack, CombatComponent->AttackCount, false);
-		}
-		else
-		{
-			PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
+			if (JumpAttack)
+			{
+				PerformAttack(ECharacterAction::JumpAttack, CombatComponent->AttackCount, false);
+				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -25.0f, true);
+			}
+			else
+			{
+				PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
+				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -15.0f, true);
+			}
 		}
 	}
 }
@@ -682,15 +692,20 @@ void AMainCharacter::PerformAction(ECharacterAction CharacterAction, ECharacterS
 
 void AMainCharacter::SprintInput()
 {
-	SetMovementSpeedMode(EMovementSpeedMode::Sprinting);
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (CanPerformSprint())
+		{
+			SetMovementSpeedMode(EMovementSpeedMode::Sprinting);
+			World->GetTimerManager().SetTimer(SprintStaminaCostTimer, this, &AMainCharacter::SprintStaminaCost, 0.1f, true);
+		}
+	}
 }
 
 void AMainCharacter::StopSprintInput()
 {
-	if (GetCurrentMovementSpeedMode() == EMovementSpeedMode::Sprinting)
-	{
-		SetMovementSpeedMode(EMovementSpeedMode::Jogging);
-	}
+	DisableSprint();
 }
 
 void AMainCharacter::InventoryInput()
@@ -754,4 +769,54 @@ void AMainCharacter::TakePointDamage(AActor* DamagedActor, float Damage, AContro
 			PlayAnimMontage(InpactResponce);
 		}
 	}
+}
+
+void AMainCharacter::OnCurrentStatValueUpdate(EStats Stat, float Value)
+{
+	if (Stat == EStats::Health && Value <= 0.0f)
+	{
+		if (StateManagerComponent)
+		{
+			StateManagerComponent->SetState(ECharacterState::Dead);
+		}
+	}
+}
+
+void AMainCharacter::SprintStaminaCost()
+{
+	if (CanPerformSprint())
+	{
+		if (StatsComponent)
+		{
+			StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -2.0f, true);
+			
+			if (StatsComponent->GetCurrentStatValue(EStats::Stamina) < 10.0f)
+			{
+				DisableSprint();
+			}
+		}
+	}
+	else
+	{
+		DisableSprint();
+	}
+}
+
+void AMainCharacter::DisableSprint()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().ClearTimer(SprintStaminaCostTimer);
+
+		if (GetCurrentMovementSpeedMode() == EMovementSpeedMode::Sprinting)
+		{
+			SetMovementSpeedMode(EMovementSpeedMode::Jogging);
+		}
+	}
+}
+
+bool AMainCharacter::CanPerformSprint()
+{
+	return GetVelocity().Length() != 0.0f;
 }
