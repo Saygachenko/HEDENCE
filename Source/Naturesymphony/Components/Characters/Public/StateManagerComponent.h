@@ -51,7 +51,7 @@ public:
 	void SetCurrentAction(ECharacterAction NewCharacterAction);
 
 	UFUNCTION(BlueprintPure)
-	ECharacterAction GetCurrentCtion() { return CurrentCharacterAction; };
+	ECharacterAction GetCurrentAction() { return CurrentCharacterAction; };
 
 	UFUNCTION(BlueprintPure)
 	bool IsCurrentActionEqualToAny(TArray<ECharacterAction> ActionsToCheckArray);

@@ -530,17 +530,18 @@ void AMainCharacter::Attack()
 {
 	if (CanPerformAttack())
 	{
-		if (StatsComponent)
+		ABaseWeapon* MainWeapon = CombatComponent->GetMainWeapon();
+		if (StatsComponent && MainWeapon)
 		{
 			if (JumpAttack)
 			{
 				PerformAttack(ECharacterAction::JumpAttack, CombatComponent->AttackCount, false);
-				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -25.0f, true);
+				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, MainWeapon->GetStatCostForAction() * -1.0f, true);
 			}
 			else
 			{
 				PerformAttack(ECharacterAction::LightAttack, CombatComponent->AttackCount, false);
-				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, -15.0f, true);
+				StatsComponent->ModifyCurrentStatValue(EStats::Stamina, MainWeapon->GetStatCostForAction() * -1.0f, true);
 			}
 		}
 	}

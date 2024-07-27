@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Naturesymphony/Inventory/Effects/Public/EquipEffect.h"
+#include "Naturesymphony/Components/Characters/Public/StateManagerComponent.h"
 #include "BaseWeapon.generated.h"
 
 /**
@@ -23,15 +24,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<UAnimMontage*> GetActionMontages(ECharacterAction CharacterAction);
 
+	UFUNCTION(BlueprintPure, Category = "Stats")
+	float GetStatCostForAction() { return OwnerStateManager ? ActionStatCost.FindRef(OwnerStateManager->GetCurrentAction()) : 0.0f; };
+
+	UFUNCTION(BlueprintPure, Category = "Stats")
+	float GetDamage() { return OwnerStateManager ? FMath::Clamp(ActionDamageMultiplier.FindRef(OwnerStateManager->GetCurrentAction()), 1.0f, ActionDamageMultiplier.FindRef(OwnerStateManager->GetCurrentAction())) * BaseDamage : BaseDamage; };
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName HandSocketName = FName();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UCollisionComponent> CollisionComponent;
-
-	UPROPERTY(EditDefaultsOnly)
-	float BaseDamage = 0.0f;
 
 	virtual void BeginPlay() override;
 
@@ -48,6 +52,18 @@ protected:
 	TArray<TObjectPtr<UAnimMontage>> JumpAttackMontage;
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float BaseDamage = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	TMap<ECharacterAction, float> ActionStatCost;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	TMap<ECharacterAction, float> ActionDamageMultiplier;
+
+	UPROPERTY()
+	TObjectPtr<UStateManagerComponent> OwnerStateManager;
+
 	UFUNCTION()
 	void OnHit(const FHitResult& HitResult);
 };

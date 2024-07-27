@@ -34,7 +34,7 @@ void ABaseWeapon::OnHit(const FHitResult& HitResult)
 			AController* InstigatorController = OwnerWeapon->GetInstigatorController();
 			if (InstigatorController)
 			{
-				UGameplayStatics::ApplyPointDamage(DamagedActor, BaseDamage, OwnerWeapon->GetActorForwardVector(), HitResult, InstigatorController, this, UDamageType::StaticClass());
+				UGameplayStatics::ApplyPointDamage(DamagedActor, GetDamage(), OwnerWeapon->GetActorForwardVector(), HitResult, InstigatorController, this, UDamageType::StaticClass());
 			}
 		}
 	}
@@ -55,6 +55,8 @@ void ABaseWeapon::OnEquipped(ECombatType CombatType)
 			if (OwnerCharacter)
 			{
 				SetIsEuqipped(true);
+
+				OwnerStateManager = CharacterOwner->GetComponentByClass<UStateManagerComponent>();
 
 				if (CombatComponent->GetCombatEnabled())
 				{
