@@ -11,9 +11,9 @@ struct FSaveItemData
 {
 	GENERATED_BODY()
 
-	FTransform Transform = FTransform();
+	//FTransform Transform = FTransform();
 
-	int32 PickUpStackSize = 1;
+	//int32 PickUpStackSize = 1;
 };
 
 UCLASS()
@@ -22,7 +22,7 @@ class NATURESYMPHONY_API USaveDataLevel : public USaveGame
 	GENERATED_BODY()
 	
 public:
-	TArray<TSoftObjectPtr<AActor>> SaveActorsRemoved;
+	//TArray<TSoftObjectPtr<AActor>> SaveActorsRemoved;
 
-	TMultiMap<TSoftClassPtr<AActor>, FSaveItemData> SaveAddedActors;
+	//TMultiMap<TSoftClassPtr<AActor>, FSaveItemData> SaveAddedActors;
 };

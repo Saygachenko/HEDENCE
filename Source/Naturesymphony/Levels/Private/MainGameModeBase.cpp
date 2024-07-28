@@ -11,7 +11,7 @@ void AMainGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
+	/*UWorld* World = GetWorld();
 	if (World)
 	{
 		SaveDataLevelObject = SaveDataLevelClass.GetDefaultObject();
@@ -65,12 +65,12 @@ void AMainGameModeBase::BeginPlay()
 				LoadGameDataLevel = UGameplayStatics::CreateSaveGameObject(SaveDataLevelClass);
 			}
 		}
-	}
+	}*/
 }
 
 void AMainGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);
+	/*UGameplayStatics::SaveGameToSlot(LoadGameDataLevel, GameDataLevel, 0);*/
 }

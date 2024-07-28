@@ -16,5 +16,5 @@ class NATURESYMPHONY_API USaveDataPlayer : public USaveGame
 	GENERATED_BODY()
 
 public:
-	TArray<FSlotStruct> SaveSlotStructArray;
+	//TArray<FSlotStruct> SaveSlotStructArray;
 };

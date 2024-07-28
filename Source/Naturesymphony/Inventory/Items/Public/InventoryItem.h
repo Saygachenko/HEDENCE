@@ -34,7 +34,7 @@ protected:
 	TObjectPtr<USceneComponent> SceneComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UWidgetComponent> WidgetComponent;

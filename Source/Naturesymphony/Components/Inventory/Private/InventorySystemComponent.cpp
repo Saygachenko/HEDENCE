@@ -33,10 +33,10 @@ void UInventorySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LoadInventory();
+	//LoadInventory();
 	SlotStructArray.SetNum(InventorySize);
 
-	OnInventoryUpdate.AddDynamic(this, &UInventorySystemComponent::SaveInventory);
+	//OnInventoryUpdate.AddDynamic(this, &UInventorySystemComponent::SaveInventory);
 }
 
 // Called every frame
@@ -279,21 +279,21 @@ void UInventorySystemComponent::DropItem(FName ItemID, int32 Quantity)
 								{
 									ItemDataComponent->PickUpQuantity = Quantity;
 
-									USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelObject;
+									/*USaveDataLevel* SaveDataLevel = GameModeBase->SaveDataLevelObject;
 									if (SaveDataLevel)
 									{
 										FSaveItemData SaveItemDataStruct;
 										SaveItemDataStruct.Transform = SpawnedActor->GetActorTransform();
 										SaveItemDataStruct.PickUpStackSize = ItemDataComponent->PickUpQuantity;
 
-										SaveDataLevel->SaveAddedActors.Add(ItemActorClass, SaveItemDataStruct);
+										SaveDataLevel->SaveAddedActors.Add(ItemActorClass, SaveItemDataStruct);*/
 
 										/*UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
 										if (MeshComponent)
 										{
 											MeshComponent->AddImpulse(OwnerForwardLocation * ImpulseVelocity, NAME_None, false);
 										}*/
-									}
+									//}
 								}
 							}
 						}
@@ -459,27 +459,27 @@ void UInventorySystemComponent::ConsumeItem(int32 IndexSlot)
 }
 
 // Function for SaveInventory
-void UInventorySystemComponent::SaveInventory()
-{
-	FString GameDataSlot = GetGameInstance()->GameDataPlayerSlot;
-
-	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
-	if (SaveDataPlayer)
-	{
-		SaveDataPlayer->SaveSlotStructArray = SlotStructArray;
-		UGameplayStatics::SaveGameToSlot(SaveDataPlayer, GameDataSlot, 0);
-	}
-}
+//void UInventorySystemComponent::SaveInventory()
+//{
+//	FString GameDataSlot = GetGameInstance()->GameDataPlayerSlot;
+//
+//	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
+//	if (SaveDataPlayer)
+//	{
+//		SaveDataPlayer->SaveSlotStructArray = SlotStructArray;
+//		UGameplayStatics::SaveGameToSlot(SaveDataPlayer, GameDataSlot, 0);
+//	}
+//}
 
 // Function for LoadInventory
-void UInventorySystemComponent::LoadInventory()
-{
-	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
-	if (SaveDataPlayer)
-	{
-		SlotStructArray = SaveDataPlayer->SaveSlotStructArray;
-	}
-}
+//void UInventorySystemComponent::LoadInventory()
+//{
+//	USaveDataPlayer* SaveDataPlayer = GetGameInstance()->SaveDataPlayerObject;
+//	if (SaveDataPlayer)
+//	{
+//		SlotStructArray = SaveDataPlayer->SaveSlotStructArray;
+//	}
+//}
 
 // Function for GetHFGameInstance
 UHFGameInstance* UInventorySystemComponent::GetGameInstance() const

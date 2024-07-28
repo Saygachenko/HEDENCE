@@ -33,6 +33,39 @@ AMainCharacter::AMainCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(FName("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
+	HairSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("HairSkeletalMesh"));
+	HairSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	BrowsSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BrowsSkeletalMesh"));
+	BrowsSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	MoustacheSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("MoustacheSkeletalMesh"));
+	MoustacheSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	BeardSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BeardSkeletalMesh"));
+	BeardSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	ShirtSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("ShirtSkeletalMesh"));
+	ShirtSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	PantsSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("PantsSkeletalMesh"));
+	PantsSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	BeltSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BeltPantsSkeletalMesh"));
+	BeltSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	BootsSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BootsPantsSkeletalMesh"));
+	BootsSkeletalMeshComponent->SetupAttachment(GetMesh());
+
+	HairSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	BrowsSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	MoustacheSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	BeardSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	ShirtSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	PantsSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	BeltSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+	BootsSkeletalMeshComponent->SetLeaderPoseComponent(GetMesh());
+
 	StatsComponent = CreateDefaultSubobject<UStatsComponent>(FName("StatsComponent"));
 	InventorySystemComponent = CreateDefaultSubobject<UInventorySystemComponent>(FName("Inventory"));
 

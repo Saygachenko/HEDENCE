@@ -17,11 +17,11 @@ AInventoryItem::AInventoryItem()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(FName("SceneComponent"));
 	RootComponent = SceneComponent;
 
-	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMeshComponent"));
-	SkeletalMeshComponent->SetupAttachment(GetRootComponent());
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"));
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
 
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("WidgetComponent"));
-	WidgetComponent->SetupAttachment(SkeletalMeshComponent);
+	WidgetComponent->SetupAttachment(StaticMeshComponent);
 
 	ItemDataComponent = CreateDefaultSubobject<UItemDataComponent>(FName("ItemData"));
 }
@@ -38,7 +38,7 @@ void AInventoryItem::Destroyed()
 {
 	Super::Destroyed();
 
-	UWorld* World = GetWorld();
+	/*UWorld* World = GetWorld();
 	if (World)
 	{
 		AMainGameModeBase* GameModeBase = Cast<AMainGameModeBase>(World->GetAuthGameMode());
@@ -50,7 +50,7 @@ void AInventoryItem::Destroyed()
 				SaveDataLevel->SaveActorsRemoved.AddUnique(this);
 			}
 		}
-	}
+	}*/
 }
 
 FText AInventoryItem::LookAt()

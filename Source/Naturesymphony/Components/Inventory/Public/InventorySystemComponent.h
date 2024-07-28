@@ -137,12 +137,12 @@ private:
 	void ConsumeItem(int32 IndexSlot);
 
 	// Function for SaveInventory
-	UFUNCTION(BlueprintCallable)
-	void SaveInventory();
+	//UFUNCTION(BlueprintCallable)
+	//void SaveInventory();
 
 	// Function for LoadInventory
-	UFUNCTION(BlueprintCallable)
-	void LoadInventory();
+	//UFUNCTION(BlueprintCallable)
+	//void LoadInventory();
 
 	// Function for GetHFGameInstance
 	UFUNCTION(BlueprintCallable)

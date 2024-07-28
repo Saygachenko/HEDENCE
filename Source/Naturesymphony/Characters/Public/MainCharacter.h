@@ -49,6 +49,30 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USpringArmComponent> SpringArmComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> HairSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> BrowsSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> MoustacheSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> BeardSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> ShirtSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> PantsSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> BeltSkeletalMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> BootsSkeletalMeshComponent;
+
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UHealthComponent> HealthComponent;*/
 
